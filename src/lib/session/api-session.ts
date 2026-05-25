@@ -1,14 +1,9 @@
-import {
-  createCipheriv,
-  createDecipheriv,
-  randomBytes,
-  scryptSync,
-} from "crypto";
 import { cookies } from "next/headers";
 import { ProviderType } from "@/types/game";
 import { SESSION_COOKIE } from "@/lib/session/constants";
 
 export { SESSION_COOKIE };
+
 const SESSION_TTL_SEC = 24 * 60 * 60;
 
 interface SessionPayload {
@@ -16,50 +11,108 @@ interface SessionPayload {
   exp: number;
 }
 
-function getEncryptionKey(): Buffer {
+// ─── Web Crypto helpers (Edge + Node.js ≥15 + Cloudflare Workers) ────────────
+
+function toBase64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+}
+
+function fromBase64Url(str: string): Uint8Array {
+  const padded = str.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = (4 - (padded.length % 4)) % 4;
+  const base64 = padded + "=".repeat(padding);
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+// Module-level key cache: derived once per isolate lifetime.
+let _keyCache: CryptoKey | null = null;
+
+async function getEncryptionKey(): Promise<CryptoKey> {
+  if (_keyCache) return _keyCache;
+
   const secret = process.env.SESSION_SECRET;
   if (!secret && process.env.NODE_ENV === "production") {
     throw new Error("SESSION_SECRET environment variable is required");
   }
-  return scryptSync(
-    secret || "dev-insecure-session-secret",
-    "jade-compass",
-    32,
+
+  const enc = new TextEncoder();
+  const rawKey = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret || "dev-insecure-session-secret"),
+    "HKDF",
+    false,
+    ["deriveKey"],
   );
+
+  _keyCache = await crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: enc.encode("jade-compass"),
+      info: new Uint8Array(),
+    },
+    rawKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+
+  return _keyCache;
 }
 
-export function encryptSessionPayload(
+// ─── Encrypt / Decrypt ───────────────────────────────────────────────────────
+// Wire format: iv(12 bytes) | AES-GCM ciphertext+tag (N+16 bytes), base64url.
+// Web Crypto AES-GCM appends the 16-byte auth tag automatically.
+
+export async function encryptSessionPayload(
   payload: Omit<SessionPayload, "exp">,
-): string {
-  const iv = randomBytes(12);
-  const key = getEncryptionKey();
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
+): Promise<string> {
+  const key = await getEncryptionKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
   const data = JSON.stringify({
     ...payload,
     exp: Date.now() + SESSION_TTL_SEC * 1000,
   });
-  const encrypted = Buffer.concat([
-    cipher.update(data, "utf8"),
-    cipher.final(),
-  ]);
-  const tag = cipher.getAuthTag();
-  return Buffer.concat([iv, tag, encrypted]).toString("base64url");
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(data),
+  );
+
+  const combined = new Uint8Array(12 + encrypted.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(encrypted), 12);
+  return toBase64Url(combined);
 }
 
-export function decryptSessionPayload(token: string): SessionPayload | null {
+export async function decryptSessionPayload(
+  token: string,
+): Promise<SessionPayload | null> {
   try {
-    const buf = Buffer.from(token, "base64url");
-    const iv = buf.subarray(0, 12);
-    const tag = buf.subarray(12, 28);
-    const encrypted = buf.subarray(28);
-    const key = getEncryptionKey();
-    const decipher = createDecipheriv("aes-256-gcm", key, iv);
-    decipher.setAuthTag(tag);
-    const data = Buffer.concat([
-      decipher.update(encrypted),
-      decipher.final(),
-    ]).toString("utf8");
-    const payload = JSON.parse(data) as SessionPayload;
+    const buf = fromBase64Url(token);
+    const iv = buf.slice(0, 12);
+    const ciphertext = buf.slice(12);
+    const key = await getEncryptionKey();
+
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      key,
+      ciphertext,
+    );
+
+    const payload = JSON.parse(
+      new TextDecoder().decode(decrypted),
+    ) as SessionPayload;
     if (payload.exp < Date.now()) return null;
     return payload;
   } catch {
@@ -67,13 +120,15 @@ export function decryptSessionPayload(token: string): SessionPayload | null {
   }
 }
 
+// ─── Cookie helpers ───────────────────────────────────────────────────────────
+
 export async function readSessionApiKeys(): Promise<Partial<
   Record<ProviderType, string>
 > | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  const payload = decryptSessionPayload(token);
+  const payload = await decryptSessionPayload(token);
   return payload?.apiKeyManager ?? null;
 }
 
@@ -81,7 +136,7 @@ export async function writeSessionCookie(
   apiKeyManager: Partial<Record<ProviderType, string>>,
 ): Promise<void> {
   const cookieStore = await cookies();
-  const token = encryptSessionPayload({ apiKeyManager });
+  const token = await encryptSessionPayload({ apiKeyManager });
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
