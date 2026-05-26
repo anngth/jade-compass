@@ -223,7 +223,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       toast.error(`${errorMessage}`);
-      logger.error("Test connection error:", error);
+      logger.warn("Test connection failed:", errorMessage);
     } finally {
       setIsTestingConnection(false);
     }

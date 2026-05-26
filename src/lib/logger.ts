@@ -30,13 +30,22 @@ const browserDebugEnabled = (() => {
 
 const createLogger = (): Logger => {
   if (isDevelopment || browserDebugEnabled) {
+    const bindConsole =
+      (method: keyof Console, fallback: keyof Console = "log") =>
+      (...args: any[]) => {
+        const fn = console[method] || console[fallback];
+        if (typeof fn === "function") {
+          (fn as (...args: any[]) => void).apply(console, args);
+        }
+      };
+
     return {
-      debug: console.debug.bind(console),
-      log: console.log.bind(console),
-      warn: console.warn.bind(console),
-      error: console.error.bind(console),
-      group: console.group.bind(console),
-      groupEnd: console.groupEnd.bind(console),
+      debug: bindConsole("debug"),
+      log: bindConsole("log"),
+      warn: bindConsole("warn"),
+      error: bindConsole("error"),
+      group: bindConsole("group"),
+      groupEnd: bindConsole("groupEnd"),
     };
   }
 
