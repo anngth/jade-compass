@@ -6,14 +6,18 @@ Quick ref for AI agents on this repo.
 
 | File | Role |
 |------|------|
-| `src/app/page.tsx` | Main page, routing (dynamic imports) |
-| `src/contexts/game-context.tsx` | Game state, story gen |
+| `src/app/page.tsx` | Gateway to Jade Compass games |
+| `src/app/relic-expedition/page.tsx` | Relic Expedition routing (dynamic imports) |
+| `src/app/astral-codex/page.tsx` | Astral Codex concept page |
+| `src/games/relic-expedition/context/game-context.tsx` | Relic game state, story gen |
 | `src/contexts/settings-context.tsx` | Settings, API key sync (`useSettings`) |
 | `src/lib/providers/` | LLM integration |
 | `src/lib/session/api-session.ts` | Encrypted session cookie |
-| `src/types/game.ts` | Types |
+| `src/types/llm.ts` | Provider/LLM types |
+| `src/games/relic-expedition/types/` | Relic game types |
 | `src/middleware.ts` | Rate limit + session guard |
-| `src/lib/api/llm-api.ts` | Client API calls |
+| `src/lib/api/llm-session.ts` | Session + provider test calls |
+| `src/games/relic-expedition/lib/api/generate-story.ts` | Relic story client call |
 
 ## Commands
 
@@ -33,14 +37,14 @@ pnpm analyze          # Bundle analysis
 2. Implement base interface
 3. Metadata in `provider-data.ts`
 4. Register in `provider-factory.ts`
-5. Update UI (`src/components/home/`)
+5. Update UI (`src/games/relic-expedition/components/setup/`)
 6. Update `docs/llm-providers.md`
 
 ### Modify Game Logic
 
-1. Types → `src/types/game.ts`
-2. Context → `src/contexts/game-context.tsx`
-3. UI → `src/components/pages/`
+1. Types → `src/games/relic-expedition/types/`
+2. Context → `src/games/relic-expedition/context/game-context.tsx`
+3. UI → `src/games/relic-expedition/components/screens/`
 4. Test end-to-end
 5. Update `docs/game-logic.md` if flow change
 
@@ -48,8 +52,8 @@ pnpm analyze          # Bundle analysis
 
 | Type | Directory |
 |------|-----------|
-| Home | `src/components/home/` |
-| Game | `src/components/pages/` |
+| Relic setup | `src/games/relic-expedition/components/setup/` |
+| Relic screens | `src/games/relic-expedition/components/screens/` |
 | Reusable | `src/components/ui/` |
 
 ### Add Feature

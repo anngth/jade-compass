@@ -14,14 +14,14 @@ import {
 import { generateObject, generateText } from "ai";
 import {
   ContentLanguageType,
-  IFullStoryResponse,
   AISDKProviderType,
-} from "@/types/game";
+} from "@/types/llm";
+import { IFullStoryResponse } from "@/games/relic-expedition/types";
 import { BaseLLMProvider } from "./base";
 import {
   FullStoryObjectSchema,
   validateFullStoryResponse,
-} from "@/lib/schemas/full-story";
+} from "@/games/relic-expedition/lib/schemas/full-story";
 import { parseJSONResponse } from "@/utils/string";
 import { logger } from "../logger";
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Jade Compass: Relic Expedition** — 2D pixel-art treasure hunt. Next.js + React + TypeScript. AI generate adventure story from player choices.
+**Jade Compass** — pixel-art home for Jade Compass adventure games. Relic Expedition is playable; Astral Codex is a concept destination. Next.js + React + TypeScript.
 
 **Repository**: [nguyenthanhan/jade-compass-relic-expedition](https://github.com/nguyenthanhan/jade-compass-relic-expedition)
 
@@ -39,13 +39,16 @@ Index: [docs/README.md](./docs/README.md)
 
 ### Entry Points
 
-- `src/app/page.tsx` — main page, routing (dynamic imports)
-- `src/contexts/game-context.tsx` — game state
+- `src/app/page.tsx` — Jade Compass home linking to adventure games
+- `src/app/relic-expedition/page.tsx` — Relic Expedition game routing (dynamic imports)
+- `src/app/astral-codex/page.tsx` — Astral Codex concept page
+- `src/games/relic-expedition/context/game-context.tsx` — Relic game state
 - `src/contexts/settings-context.tsx` — settings (`useSettings`)
 - `src/lib/providers/` — LLM integration
 - `src/lib/session/api-session.ts` — encrypted session cookie
 - `src/middleware.ts` — rate limit + session guard
-- `src/types/game.ts` — types
+- `src/types/llm.ts` — provider/LLM types
+- `src/games/relic-expedition/types/` — Relic game types
 
 ### Commands
 
@@ -62,12 +65,13 @@ pnpm analyze      # Bundle analysis
 ```
 src/
 ├── app/api/          # generate-story, session, test-connection
-├── components/       # home/, pages/, ui/, error-boundary
-├── contexts/         # game-context, settings-context
+├── components/       # shared/, ui/
+├── contexts/         # settings-context
+├── games/            # relic-expedition feature code
 ├── hooks/            # use-provider-data
 ├── lib/              # providers/, api/, schemas/, session/
 ├── middleware.ts
-├── types/
+├── types/            # platform/shared types
 └── utils/
 ```
 

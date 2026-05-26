@@ -14,9 +14,9 @@ import {
   IGameState,
   IChoice,
   IGameRound,
-} from "@/types/game";
-import { generateStory } from "@/lib/api/llm-api";
-import { createStorySeed } from "@/lib/story-seed";
+} from "@/games/relic-expedition/types";
+import { generateStory } from "@/games/relic-expedition/lib/api/generate-story";
+import { createStorySeed } from "@/games/relic-expedition/lib/story-seed";
 import { useSettings } from "@/contexts/settings-context";
 import { toast } from "sonner";
 

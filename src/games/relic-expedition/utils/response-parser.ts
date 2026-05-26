@@ -3,7 +3,7 @@ import {
   IGameRound,
   IChoice,
   INarrativeState,
-} from "@/types/game";
+} from "@/games/relic-expedition/types";
 
 function readPath(obj: unknown, ...keys: string[]): unknown {
   if (!obj || typeof obj !== "object") return undefined;

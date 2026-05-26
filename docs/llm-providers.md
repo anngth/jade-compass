@@ -62,13 +62,13 @@ Models in `provider-data.ts`. Custom model via `__custom__`.
 2. Implement base interface
 3. Add metadata + models to `provider-data.ts`
 4. Register in `provider-factory.ts`
-5. Update UI (`src/components/home/`)
+5. Update UI (`src/games/relic-expedition/components/setup/`)
 6. Test sample requests
 7. **Update docs** if arch change
 
 ## Integration Layers
 
-### Client (`src/lib/api/llm-api.ts`)
+### Client (`src/lib/api/llm-session.ts`, `src/games/relic-expedition/lib/api/generate-story.ts`)
 
 - `syncApiSession()` / `clearApiSession()` — encrypted session cookie
 - `generateStory()` / `testProviderConnection()` — call API routes (keys stripped from body)

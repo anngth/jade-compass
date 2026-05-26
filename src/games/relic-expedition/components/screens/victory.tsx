@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useGame } from "@/contexts/game-context";
+import { useGame } from "@/games/relic-expedition/context/game-context";
 import { useSettings } from "@/contexts/settings-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

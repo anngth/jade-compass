@@ -5,9 +5,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 
-# 🎮 Jade Compass: Relic Expedition
+# Jade Compass
 
-A retro 2D pixel-art treasure hunting adventure game built with Next.js, React, and TypeScript. Navigate through perilous choices to find the legendary Jade Compass!
+A retro pixel-art home for Jade Compass adventure games, built with Next.js, React, and TypeScript. It currently links to the playable **Relic Expedition** and the early concept page for **Astral Codex**.
 
 ## 🚀 Quick Start
 
@@ -35,6 +35,12 @@ pnpm dev
 ```
 
 4. **Open** [http://localhost:3000](http://localhost:3000) in your browser
+
+## Game Routes
+
+- `/` — Jade Compass home
+- `/relic-expedition` — playable treasure hunting adventure
+- `/astral-codex` — concept page for the planned second game
 
 ## 🎯 How to Play
 

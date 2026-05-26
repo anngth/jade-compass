@@ -11,9 +11,14 @@ import React, {
   useRef,
 } from "react";
 import { logger } from "@/lib/logger";
-import { ISettings, IProviderConfig } from "@/types/game";
+import { IProviderConfig } from "@/types/llm";
+import { ISettings } from "@/types/settings";
 import { StoredSettingsSchema } from "@/lib/schemas/settings";
-import { syncApiSession, testProviderConnection } from "@/lib/api/llm-api";
+import {
+  clearApiSession,
+  syncApiSession,
+  testProviderConnection,
+} from "@/lib/api/llm-session";
 import {
   clearLegacyApiKeysFromLocalStorage,
   loadApiKeys,
@@ -79,6 +84,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     () =>
       debounce(async (providerConfig: IProviderConfig) => {
         try {
+          const provider = providerConfig.provider || "openai";
+          const apiKey = providerConfig.apiKeyManager?.[provider];
+          if (!apiKey?.trim()) {
+            await clearApiSession();
+            return;
+          }
+
           await syncApiSession(providerConfig);
         } catch (error) {
           logger.error("Failed to sync API session:", error);

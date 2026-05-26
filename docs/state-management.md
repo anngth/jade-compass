@@ -4,8 +4,8 @@
 
 | Context | File | Hook | Responsibility |
 |---------|------|------|----------------|
-| Game | `game-context.tsx` | `useGame()` | Round, choices, story |
-| Settings | `settings-context.tsx` | `useSettings()` | Rounds, choices, provider, model, contentLanguage |
+| Relic game | `games/relic-expedition/context/game-context.tsx` | `useGame()` | Round, choices, story |
+| Settings | `contexts/settings-context.tsx` | `useSettings()` | Rounds, choices, provider, model, contentLanguage |
 
 Settings (no API keys) auto-save to `localStorage` (`jadeCompassSettings`), debounced. Context values memoized.
 
@@ -38,7 +38,7 @@ Key points:
 
 - **sessionStorage** — client keys (`jadeCompassApiKeys` in `api-key-storage.ts`)
 - **localStorage** — game settings only; keys stripped before save
-- **Request bodies** — never have keys (`stripApiKeys` in `llm-api.ts`)
+- **Request bodies** — never have keys (`withoutApiKeys` in `llm-session.ts`)
 - **401** — client auto-retry after re-sync (`fetchWithSessionRetry`)
 - Legacy keys in localStorage cleaned via `clearLegacyApiKeysFromLocalStorage()`
 
@@ -54,10 +54,10 @@ Key points:
 ## Security
 
 - **API Keys** — never commit/log. Client: sessionStorage. Server: encrypted httpOnly cookie only
-- **Validation** — Zod (`src/lib/schemas/`); server: `validate-llm-request.ts`
+- **Validation** — Zod (`src/lib/schemas/`, `src/games/relic-expedition/lib/schemas/`); server: `validate-llm-request.ts`
 - **Rate Limit** — 10 req/min `/api/*` via middleware
 - **Headers** — CSP, X-Frame-Options, etc. in `next.config.ts`
-- **Error Boundaries** — `error-boundary.tsx`
+- **Error Boundaries** — `components/shared/error-boundary.tsx`
 
 ## Performance
 

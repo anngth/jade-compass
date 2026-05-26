@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, ChevronDown, Loader2 } from "lucide-react";
 import { ModelSelector } from "./model-selector";
-import { IProviderConfig, ProviderType } from "@/types/game";
+import { IProviderConfig, ProviderType } from "@/types/llm";
 import { useProviderData } from "@/hooks/use-provider-data";
 import { useSettings } from "@/contexts/settings-context";
 

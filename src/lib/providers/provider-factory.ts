@@ -1,4 +1,4 @@
-import { LLMProvider, IProviderConfig } from "@/types/game";
+import { LLMProvider, IProviderConfig } from "@/types/llm";
 import { providerData } from "@/lib/providers/provider-data";
 
 export class ProviderFactory {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Orbitron, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { SettingsProvider } from "@/contexts/settings-context";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { Toaster } from "sonner";
 
 const orbitron = Orbitron({
@@ -18,8 +18,8 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jade Compass: Relic Expedition",
-  description: "A treasure hunting adventure game",
+  title: "Jade Compass",
+  description: "A home for Jade Compass pixel-art adventure games",
 };
 
 export default function RootLayout({

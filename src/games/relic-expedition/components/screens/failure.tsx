@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useGame } from "@/contexts/game-context";
+import { useGame } from "@/games/relic-expedition/context/game-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skull, X } from "lucide-react";

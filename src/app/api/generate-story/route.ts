@@ -3,8 +3,8 @@ export const runtime = "edge";
 import { NextResponse } from "next/server";
 import { ProviderFactory } from "@/lib/providers/provider-factory";
 import { validateLlmRequest } from "@/lib/api/validate-llm-request";
-import { createStorySeed } from "@/lib/story-seed";
-import { FullStoryResponseSchema } from "@/lib/schemas/full-story";
+import { createStorySeed } from "@/games/relic-expedition/lib/story-seed";
+import { FullStoryResponseSchema } from "@/games/relic-expedition/lib/schemas/full-story";
 
 export async function POST(request: Request) {
   try {

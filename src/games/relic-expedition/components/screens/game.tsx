@@ -1,9 +1,9 @@
 "use client";
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from "react";
-import { useGame } from "@/contexts/game-context";
+import { useGame } from "@/games/relic-expedition/context/game-context";
 import { useSettings } from "@/contexts/settings-context";
-import { IChoice } from "@/types/game";
+import { IChoice } from "@/games/relic-expedition/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 

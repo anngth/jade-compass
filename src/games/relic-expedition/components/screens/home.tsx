@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useGame } from "@/contexts/game-context";
+import { useGame } from "@/games/relic-expedition/context/game-context";
 import { useSettings } from "@/contexts/settings-context";
 import { toast } from "sonner";
 import { useProviderData } from "@/hooks/use-provider-data";
@@ -10,7 +10,7 @@ import {
   IntroductionCard,
   NewAdventureCard,
   AIConfigurationCard,
-} from "@/components/home";
+} from "@/games/relic-expedition/components/setup";
 
 export function HomePage() {
   const { startGame } = useGame();

@@ -6,12 +6,12 @@ Four values in `IGameState.status`:
 
 | Status | UI | Component |
 |--------|-----|-----------|
-| `idle` | Home / config | `pages/home.tsx` |
-| `playing` | Gameplay | `pages/game.tsx` |
-| `victory` | Win | `pages/victory.tsx` |
-| `failure` | Game over | `pages/failure.tsx` |
+| `idle` | Home / config | `games/relic-expedition/components/screens/home.tsx` |
+| `playing` | Gameplay | `games/relic-expedition/components/screens/game.tsx` |
+| `victory` | Win | `games/relic-expedition/components/screens/victory.tsx` |
+| `failure` | Game over | `games/relic-expedition/components/screens/failure.tsx` |
 
-`GameRouter` in `src/app/page.tsx` route by `gameState.status`.
+`GameRouter` in `src/app/relic-expedition/page.tsx` routes by `gameState.status`.
 
 ## Flow
 
@@ -35,7 +35,7 @@ Player start game:
 1. `createStorySeed()` — reproducibility seed (`story-seed.ts`)
 2. `generateStory()` → `POST /api/generate-story` with config + seed
 3. LLM return **full story upfront** (intro + all rounds)
-4. **Server-side** Zod validate + parse — providers via `validateFullStoryResponse()` (`lib/schemas/full-story.ts` + `utils/response-parser.ts`); API route via `FullStoryResponseSchema.parse()`
+4. **Server-side** Zod validate + parse — providers via `validateFullStoryResponse()` (`games/relic-expedition/lib/schemas/full-story.ts` + `games/relic-expedition/utils/response-parser.ts`); API route via `FullStoryResponseSchema.parse()`
 5. Client receive validated JSON → store in `allRounds`; `makeChoice()` advance locally — no more LLM calls during play
 
 ## Controls

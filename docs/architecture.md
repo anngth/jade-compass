@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Jade Compass: Relic Expedition** — 2D pixel-art treasure hunt. Next.js + React + TypeScript. AI generate adventure story from player choices.
+**Jade Compass** — pixel-art home for Jade Compass adventure games. Next.js + React + TypeScript. Relic Expedition is playable; Astral Codex is a concept destination.
 
 **Repository**: [nguyenthanhan/jade-compass-relic-expedition](https://github.com/nguyenthanhan/jade-compass-relic-expedition)
 
@@ -26,16 +26,18 @@
 RootLayout (layout.tsx)
   └── ErrorBoundary
         └── SettingsProvider          # settings, API keys, session sync
-              └── page.tsx
-                    └── GameProvider  # game state, story, choices
+              ├── page.tsx                         # Jade Compass home
+              ├── astral-codex/page.tsx            # concept page
+              └── relic-expedition/page.tsx
+                    └── GameProvider               # game state, story, choices
                           └── GameRouter (dynamic imports)
-                                ├── HomePage    (status: idle)
-                                ├── GamePage    (status: playing)
-                                ├── VictoryPage (status: victory)
-                                └── FailurePage (status: failure)
+                                ├── HomePage       (status: idle)
+                                ├── GamePage       (status: playing)
+                                ├── VictoryPage    (status: victory)
+                                └── FailurePage    (status: failure)
 ```
 
-Pages lazy-load via `next/dynamic` in `src/app/page.tsx`.
+Relic Expedition pages lazy-load via `next/dynamic` in `src/app/relic-expedition/page.tsx`.
 
 ## Project Structure
 
@@ -48,33 +50,44 @@ src/
 │   │   └── test-connection/     # POST — test provider (edge)
 │   ├── globals.css
 │   ├── layout.tsx
+│   ├── astral-codex/
+│   │   └── page.tsx              # Concept page for planned second game
+│   ├── relic-expedition/
+│   │   └── page.tsx              # Playable game route
 │   └── page.tsx
 ├── components/
-│   ├── error-boundary.tsx
-│   ├── home/                    # Game config screen
-│   ├── pages/                   # home, game, victory, failure
+│   ├── shared/                  # Cross-game components
 │   └── ui/                      # button, card, input, select
 ├── contexts/
-│   ├── game-context.tsx         # Game state
-│   └── settings-context.tsx     # Settings (rounds, provider, model, lang)
+│   └── settings-context.tsx     # Settings, provider, model, API key sync
+├── games/
+│   └── relic-expedition/
+│       ├── components/
+│       │   ├── setup/           # Relic setup/config screen
+│       │   └── screens/         # Relic home, game, victory, failure
+│       ├── context/             # Relic game state
+│       ├── lib/                 # Relic story API, seed, schemas
+│       ├── types/
+│       └── utils/
 ├── hooks/
 │   └── use-provider-data.ts     # Lazy-load provider metadata
 ├── lib/
 │   ├── api/
-│   │   ├── llm-api.ts           # Client API calls
+│   │   ├── llm-session.ts       # Session sync + provider test calls
+│   │   ├── llm-api.ts           # Compatibility re-exports
 │   │   └── validate-llm-request.ts  # Server request validation
 │   ├── providers/               # LLM adapter layer
-│   ├── schemas/                 # Zod schemas (settings, full-story)
+│   ├── schemas/                 # Platform Zod schemas
 │   ├── session/                 # Encrypted session cookie
 │   ├── api-key-storage.ts       # sessionStorage for API keys
-│   ├── logger.ts
-│   └── story-seed.ts
+│   └── logger.ts
 ├── middleware.ts                # Rate limit + session guard
 ├── types/
-│   └── game.ts
+│   ├── llm.ts
+│   ├── settings.ts
+│   └── game.ts                  # Compatibility type re-exports
 └── utils/
     ├── debounce.ts
-    ├── response-parser.ts
     └── string.ts
 ```
 
@@ -110,9 +123,12 @@ All routes: **Edge Runtime**. Keys **never** in request bodies — see [State Ma
 
 | File | Role |
 |------|------|
-| `src/app/page.tsx` | Main page, route by game state |
-| `src/contexts/game-context.tsx` | Game state |
+| `src/app/page.tsx` | Jade Compass home linking to adventure games |
+| `src/app/relic-expedition/page.tsx` | Relic Expedition route by game state |
+| `src/app/astral-codex/page.tsx` | Concept destination for the planned second game |
+| `src/games/relic-expedition/context/game-context.tsx` | Relic Expedition game state |
 | `src/contexts/settings-context.tsx` | Player settings (`useSettings`) |
 | `src/lib/providers/` | LLM integration |
 | `src/lib/session/api-session.ts` | Encrypted session cookie |
-| `src/types/game.ts` | Type definitions |
+| `src/types/llm.ts` | Provider and LLM type definitions |
+| `src/games/relic-expedition/types/` | Relic game type definitions |

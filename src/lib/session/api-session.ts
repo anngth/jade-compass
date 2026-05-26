@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { ProviderType } from "@/types/game";
+import { ProviderType } from "@/types/llm";
 import { SESSION_COOKIE } from "@/lib/session/constants";
 
 export { SESSION_COOKIE };

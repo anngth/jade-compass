@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { IFullStoryResponse } from "@/types/game";
-import { parseToFullStoryResponse } from "@/utils/response-parser";
+import { IFullStoryResponse } from "@/games/relic-expedition/types";
+import { parseToFullStoryResponse } from "@/games/relic-expedition/utils/response-parser";
 
 const NarrativeStateSchema = z.object({
   location: z.string(),

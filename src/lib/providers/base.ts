@@ -1,8 +1,8 @@
 import {
   LLMProvider,
-  IFullStoryResponse,
   ContentLanguageType,
-} from "@/types/game";
+} from "@/types/llm";
+import { IFullStoryResponse } from "@/games/relic-expedition/types";
 import { logger } from "@/lib/logger";
 
 export abstract class BaseLLMProvider implements LLMProvider {

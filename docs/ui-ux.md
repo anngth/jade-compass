@@ -2,8 +2,8 @@
 
 ## Design System
 
-- **Theme** — retro pixel-art adventure
-- **Palette** — earth tones (parchment bg), jade green primary, gold accents
+- **Theme** — route-specific retro adventure themes
+- **Palette** — Relic Expedition keeps earth tones (parchment bg), jade green primary, gold accents; `/` uses a midnight teal/orange home theme; `/astral-codex` uses a cosmic violet/cyan theme
 - **Typography** — Orbitron (headings, `.font-pixel`) + Space Mono (body, `.font-retro`)
 - **Animations** — CSS transitions, bounce loading dots, pixel-border
 - **Rendering** — `image-rendering: pixelated` for crisp pixels
@@ -22,7 +22,7 @@
 | `--muted`, `--muted-foreground` | Subdued text/bg |
 | `--border`, `--input`, `--ring` | Borders, focus rings |
 
-Dark mode via `prefers-color-scheme: dark`.
+Relic Expedition uses the root variables and dark mode via `prefers-color-scheme: dark`. Route-specific themes use scoped classes in `globals.css`: `.theme-jade-home` and `.theme-astral-codex`.
 
 ## Button Variants
 
@@ -32,9 +32,9 @@ Use: `default`, `outline`, `secondary`, `destructive`.
 
 | Group | Directory | Description |
 |-------|-----------|-------------|
-| Home | `src/components/home/` | Setup, AI config, intro |
-| Game | `src/components/pages/game.tsx` | Choices, progress |
-| Pages | `src/components/pages/` | Victory, failure, home |
+| Relic setup | `src/games/relic-expedition/components/setup/` | Setup, AI config, intro |
+| Relic game | `src/games/relic-expedition/components/screens/game.tsx` | Choices, progress |
+| Relic screens | `src/games/relic-expedition/components/screens/` | Victory, failure, home |
 | UI | `src/components/ui/` | button, card, input, select |
 
 ### Home Components

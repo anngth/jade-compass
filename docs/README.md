@@ -1,6 +1,6 @@
 # Documentation Index
 
-Docs for **Jade Compass: Relic Expedition**. Split from `AGENTS.md` for easy nav + maintenance.
+Docs for **Jade Compass** and its adventure routes. Split from `AGENTS.md` for easy nav + maintenance.
 
 ## Table of Contents
 

@@ -1,4 +1,4 @@
-import { ProviderType } from "@/types/game";
+import { ProviderType } from "@/types/llm";
 
 const SESSION_KEY = "jadeCompassApiKeys";
 

@@ -1,9 +1,9 @@
 import {
   ContentLanguageType,
-  IGameConfig,
   IProviderConfig,
   ProviderType,
-} from "@/types/game";
+} from "@/types/llm";
+import { IGameConfig } from "@/games/relic-expedition/types";
 import { readSessionApiKeys } from "@/lib/session/api-session";
 
 const VALID_PROVIDERS = new Set<string>([

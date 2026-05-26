@@ -1,7 +1,8 @@
 import { OpenAI } from "openai";
-import { ContentLanguageType, IFullStoryResponse } from "@/types/game";
+import { ContentLanguageType } from "@/types/llm";
+import { IFullStoryResponse } from "@/games/relic-expedition/types";
 import { BaseLLMProvider } from "./base";
-import { validateFullStoryResponse } from "@/lib/schemas/full-story";
+import { validateFullStoryResponse } from "@/games/relic-expedition/lib/schemas/full-story";
 import { parseJSONResponse } from "@/utils/string";
 import { logger } from "../logger";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProviderDataType } from "@/types/game";
+import { ProviderDataType } from "@/types/llm";
 
 let cachedProviderData: ProviderDataType | null = null;
 

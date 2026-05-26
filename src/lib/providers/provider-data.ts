@@ -1,4 +1,4 @@
-import { ProviderDataType } from "@/types/game";
+import { ProviderDataType } from "@/types/llm";
 
 // ─── OpenAI ──────────────────────────────────────────────────────────────────
 // Removed: gpt-5-chat-latest (non-standard), gpt-4-turbo / gpt-4 / gpt-3.5-turbo
