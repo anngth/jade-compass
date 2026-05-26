@@ -5,15 +5,13 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 # 🎮 Jade Compass: Relic Expedition
 
 A retro 2D pixel-art treasure hunting adventure game built with Next.js, React, and TypeScript. Navigate through perilous choices to find the legendary Jade Compass!
 
 ## 🚀 Quick Start
 
-**Prerequisites**: Node.js 18+ (recommended: 20+), pnpm/yarn/npm
+**Prerequisites**: Node.js 18+ (recommended: 20+), pnpm
 
 1. **Clone & Install**:
 
@@ -23,64 +21,80 @@ cd jade-compass-relic-expedition
 pnpm install
 ```
 
-2. **Run Development Server**:
+2. **Configure environment** (optional for local dev, required for production):
 
 ```bash
-pnpm run dev
+cp .env.example .env.local
+# Set SESSION_SECRET — see .env.example for details
 ```
 
-3. **Open** [http://localhost:3000](http://localhost:3000) in your browser
+3. **Run Development Server**:
 
-**Features**: Hot reload, TypeScript, ESLint, Tailwind CSS
+```bash
+pnpm dev
+```
+
+4. **Open** [http://localhost:3000](http://localhost:3000) in your browser
 
 ## 🎯 How to Play
 
-1. **Configure**: Set rounds (2-10), choices per round (2-5), and content language (English/Vietnamese)
+1. **Configure**: Set rounds (2–10), choices per round (2–5), and content language (English/Vietnamese)
 2. **Choose Provider**: Select an AI provider and enter your API key
 3. **Make Choices**: Each round has multiple choices, but only one leads forward
 4. **Find Treasure**: Survive all rounds to claim the Jade Compass
 
-**Controls**: Mouse clicks, number keys (1-5), or Tab/Enter for accessibility
+**Controls**: Mouse clicks, number keys (1–5), or Tab/Enter for accessibility
 
-## 🤖 LLM Provider Configuration
-
-### API Providers
+## 🤖 LLM Providers
 
 **Setup**: Get API key → Select provider → Enter key → (Optional) Choose model
 
-**Supported Providers**:
+Supported providers (direct API and AI SDK variants):
 
-- **OpenAI**: GPT-5, GPT-4, GPT-3.5 models with custom model support
-- **OpenRouter**: DeepSeek, Kimi, Qwen, Llama, Mistral, Gemini variants
-- **Anthropic**: Claude Opus 4, Claude Sonnet 4, Claude Haiku models
-- **Google**: Gemini 2.5 Flash, Gemini 2.5 Pro, Gemini 2.0 models
-- **Mistral**: Mistral Large, Medium, Small models (with proper JSON format templates)
-- **Vercel AI SDK**: Unified interface for multiple providers (OpenAI, Anthropic, Google, Groq, Mistral, OpenRouter)
+- **OpenAI** — GPT-5, GPT-4o models
+- **OpenRouter** — DeepSeek, Qwen, Kimi (free tier)
+- **Anthropic** — Claude Opus 4, Sonnet 4, Haiku 4.5
+- **Google** — Gemini 3.5 Flash, Gemini 2.5 Pro/Flash
+- **Mistral** — Mistral Large, Medium, Small
+- **Groq** — Llama, Qwen (via AI SDK)
 
-**AI SDK Variants**: Enhanced functionality available for all providers
+See [docs/llm-providers.md](./docs/llm-providers.md) for the full list and architecture.
 
 ## 🎨 Features
 
-**Visual**: Retro pixel-art style with custom animations  
-**Gameplay**: Multiple endings, choice-based progression  
-**Accessibility**: Full keyboard navigation, ARIA labels, focus management  
-**Language**: Content generation in English or Vietnamese  
-**Technical**: Responsive design, sessionStorage for API keys, server-side LLM proxy, Next.js 16 + React 19+
+- Retro pixel-art style with custom animations
+- Choice-based progression with multiple endings
+- Full keyboard navigation and ARIA labels
+- Content generation in English or Vietnamese
+- Responsive design, Next.js 16 + React 19
 
 ## 📝 Scripts
 
-**Development**: `pnpm dev` (start), `pnpm build` (build), `pnpm start` (production)  
-**Quality**: `pnpm lint` (ESLint), `pnpm type-check` (TypeScript)  
-**Release**: `pnpm release` (auto-version), `pnpm changelog` (extract)
+| Category | Commands |
+|----------|----------|
+| Development | `pnpm dev`, `pnpm build`, `pnpm start` |
+| Quality | `pnpm lint`, `pnpm type-check`, `pnpm audit` |
+| Analysis | `pnpm analyze` |
+| Release | `pnpm release`, `pnpm release:patch/minor/major`, `pnpm changelog` |
 
 ## 🔒 Security
 
-**API Keys**: Stored in browser sessionStorage; synced once to an encrypted httpOnly cookie via `/api/session`  
-**LLM Requests**: Proxied server-side; keys are never included in generate/test request bodies  
-**Session**: Requires `SESSION_SECRET` in production (see `.env.example`)  
-**Rate Limiting**: Per-session (or per-IP fallback) via middleware  
-**Headers**: CSP, X-Frame-Options, and related security headers enabled  
-**Production**: HTTPS required for secure cookies
+- **API Keys**: Stored in browser sessionStorage; synced to an encrypted httpOnly cookie via `/api/session`
+- **LLM Requests**: Handled server-side via API routes; keys are never included in request bodies
+- **Session**: Requires `SESSION_SECRET` in production (see `.env.example`)
+- **Rate Limiting**: Per-session (or per-IP fallback) via middleware
+- **Headers**: CSP, X-Frame-Options, and related security headers in `next.config.ts`
+
+See [docs/state-management.md](./docs/state-management.md) for the full API key flow.
+
+## 📚 Documentation
+
+Technical documentation for contributors and agents:
+
+- [docs/README.md](./docs/README.md) — Documentation index
+- [docs/architecture.md](./docs/architecture.md) — Project structure, API routes
+- [docs/development.md](./docs/development.md) — Environment, CI, commands
+- [AGENTS.md](./AGENTS.md) — Agent quick reference
 
 ---
 
