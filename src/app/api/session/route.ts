@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { NextResponse } from "next/server";
 import { validateSessionSetup } from "@/lib/api/validate-llm-request";
 import { writeSessionCookie, clearSessionCookie } from "@/lib/session/api-session";

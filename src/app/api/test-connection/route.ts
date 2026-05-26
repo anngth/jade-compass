@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { NextResponse } from "next/server";
 import { ProviderFactory } from "@/lib/providers/provider-factory";
 import { validateLlmRequest } from "@/lib/api/validate-llm-request";

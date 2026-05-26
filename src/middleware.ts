@@ -61,7 +61,7 @@ function isRateLimited(key: string): boolean {
   return false;
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (!pathname.startsWith("/api/")) {
     return NextResponse.next();
