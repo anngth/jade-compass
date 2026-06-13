@@ -1,22 +1,15 @@
-# Documentation Index
+# Documentation
 
-Docs for **Jade Compass** and its adventure routes. Split from `AGENTS.md` for easy nav + maintenance.
+Each topic has one primary document:
 
-## Table of Contents
+| Document | Scope |
+|---|---|
+| [Architecture](./architecture.md) | Runtime structure, routes, proxy, security headers |
+| [Development](./development.md) | Setup, commands, CI, contribution rules |
+| [Game Logic](./game-logic.md) | Relic Expedition states and story flow |
+| [LLM Providers](./llm-providers.md) | Provider architecture and extension steps |
+| [State and Security](./state-management.md) | Settings, API keys, sessions, rate limits |
+| [UI/UX](./ui-ux.md) | Themes, components, interaction requirements |
+| [Testing](./testing.md) | Current coverage and test priorities |
 
-| Document | Contents |
-|----------|----------|
-| [Architecture](./architecture.md) | Stack, provider hierarchy, API routes, middleware, security headers |
-| [Game Logic](./game-logic.md) | States, flow, story gen, controls |
-| [Development](./development.md) | Commands, env, CI, coding style |
-| [UI/UX](./ui-ux.md) | Design system, CSS vars, components |
-| [LLM Providers](./llm-providers.md) | Provider arch, models, add new provider |
-| [State Management](./state-management.md) | Context, API key flow, session, security |
-| [Testing](./testing.md) | Test guidelines (when added) |
-| [Contributing](./contributing.md) | Commit/PR, doc standards, perf |
-| [Agent Guide](./agent-guide.md) | Agent quick start, tasks, troubleshooting |
-| [Future](./future.md) | Planned features, tech debt |
-
-## Keep Docs Current
-
-Code change make docs wrong → update same PR/commit. Full checklist: [Contributing — Documentation Standards](./contributing.md#documentation-standards).
+Keep documentation focused on stable behavior and maintain it in the same change as the code it describes.

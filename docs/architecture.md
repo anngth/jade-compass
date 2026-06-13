@@ -1,134 +1,52 @@
 # Architecture
 
-## Overview
+Jade Compass uses Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4, Zod, and pnpm. It deploys to Vercel.
 
-**Jade Compass** — pixel-art home for Jade Compass adventure games. Next.js + React + TypeScript. Relic Expedition is playable; Astral Codex is a concept destination.
+## Runtime Structure
 
-**Repository**: [nguyenthanhan/jade-compass-relic-expedition](https://github.com/nguyenthanhan/jade-compass-relic-expedition)
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Framework | Next.js 16 (App Router) |
-| Frontend | React 19, TypeScript 5 |
-| Styling | Tailwind CSS 4 |
-| UI | shadcn/ui, Radix UI |
-| Icons | Lucide React |
-| Validation | Zod |
-| Toast | Sonner |
-| Package Manager | pnpm |
-| Deployment | Vercel |
-
-## Provider Hierarchy
-
-```
-RootLayout (layout.tsx)
-  └── ErrorBoundary
-        └── SettingsProvider          # settings, API keys, session sync
-              ├── page.tsx                         # Jade Compass home
-              ├── astral-codex/page.tsx            # concept page
-              └── relic-expedition/page.tsx
-                    └── GameProvider               # game state, story, choices
-                          └── GameRouter (dynamic imports)
-                                ├── HomePage       (status: idle)
-                                ├── GamePage       (status: playing)
-                                ├── VictoryPage    (status: victory)
-                                └── FailurePage    (status: failure)
-```
-
-Relic Expedition pages lazy-load via `next/dynamic` in `src/app/relic-expedition/page.tsx`.
-
-## Project Structure
-
-```
+```text
 src/
-├── app/                         # Next.js App Router
-│   ├── api/
-│   │   ├── generate-story/      # POST — generate story (edge)
-│   │   ├── session/             # POST/DELETE — session mgmt (edge)
-│   │   └── test-connection/     # POST — test provider (edge)
-│   ├── globals.css
-│   ├── layout.tsx
-│   ├── astral-codex/
-│   │   └── page.tsx              # Concept page for planned second game
-│   ├── relic-expedition/
-│   │   └── page.tsx              # Playable game route
-│   └── page.tsx
-├── components/
-│   ├── shared/                  # Cross-game components
-│   └── ui/                      # button, card, input, select
-├── contexts/
-│   └── settings-context.tsx     # Settings, provider, model, API key sync
-├── games/
-│   └── relic-expedition/
-│       ├── components/
-│       │   ├── setup/           # Relic setup/config screen
-│       │   └── screens/         # Relic home, game, victory, failure
-│       ├── context/             # Relic game state
-│       ├── lib/                 # Relic story API, seed, schemas
-│       ├── types/
-│       └── utils/
-├── hooks/
-│   └── use-provider-data.ts     # Lazy-load provider metadata
+├── app/
+│   ├── api/                    # session, story generation, provider test
+│   ├── relic-expedition/       # playable game route
+│   └── astral-codex/           # concept route
+├── components/                 # shared and primitive UI
+├── contexts/                   # application settings
+├── games/relic-expedition/     # game feature
+├── hooks/                      # shared React hooks
 ├── lib/
-│   ├── api/
-│   │   ├── llm-session.ts       # Session sync + provider test calls
-│   │   ├── llm-api.ts           # Compatibility re-exports
-│   │   └── validate-llm-request.ts  # Server request validation
-│   ├── providers/               # LLM adapter layer
-│   ├── schemas/                 # Platform Zod schemas
-│   ├── session/                 # Encrypted session cookie
-│   ├── api-key-storage.ts       # sessionStorage for API keys
-│   └── logger.ts
-├── middleware.ts                # Rate limit + session guard
+│   ├── api/                    # client/server request helpers
+│   ├── providers/              # LLM adapters
+│   ├── schemas/                # platform validation
+│   └── session/                # encrypted API-key cookie
+├── proxy.ts                    # API protection
 ├── types/
-│   ├── llm.ts
-│   ├── settings.ts
-│   └── game.ts                  # Compatibility type re-exports
 └── utils/
-    ├── debounce.ts
-    └── string.ts
 ```
 
-## API Routes
+`src/app/layout.tsx` provides the error boundary and settings context. Relic Expedition adds its game context and selects screens from `gameState.status`.
 
-| Route | Methods | Description |
-|-------|---------|-------------|
-| `/api/session` | POST, DELETE | Create/delete encrypted session cookie |
-| `/api/generate-story` | POST | Generate story via LLM (key from cookie) |
-| `/api/test-connection` | POST | Test provider (key from cookie) |
+## API
 
-All routes: **Edge Runtime**. Keys **never** in request bodies — see [State Management & Security](./state-management.md#api-key-flow).
+All API routes use the Edge Runtime.
 
-## Middleware
+| Route | Methods | Purpose |
+|---|---|---|
+| `/api/session` | POST, DELETE | Create or clear the encrypted API-key session |
+| `/api/generate-story` | POST | Generate and validate a complete story |
+| `/api/test-connection` | POST | Verify the selected provider |
 
-`src/middleware.ts`:
+API keys come from the encrypted cookie, never from story or connection request bodies.
 
-- **Rate limit** all `/api/*` — 10 req/min per session or IP
-- **Session guard** — `/api/generate-story`, `/api/test-connection` need valid session cookie
+## Request Protection
 
-> In-memory rate limit store. Serverless multi-instance → effective limit = `MAX_REQUESTS × instance count`.
+`src/proxy.ts` applies:
 
-## Security Headers
+- 5 requests/minute per trusted client IP for `/api/session`
+- 10 requests/minute per trusted client IP for other API routes
+- a 5,000-key in-memory store with oldest-key eviction
+- a session-cookie requirement for story generation and connection tests
 
-`next.config.ts`:
+The store is per process, so limits are not globally consistent across serverless instances. Use a distributed store if strict global enforcement becomes necessary.
 
-- Content-Security-Policy (CSP)
-- X-Content-Type-Options: nosniff
-- X-Frame-Options: DENY
-- Referrer-Policy, Permissions-Policy
-
-## Entry Points
-
-| File | Role |
-|------|------|
-| `src/app/page.tsx` | Jade Compass home linking to adventure games |
-| `src/app/relic-expedition/page.tsx` | Relic Expedition route by game state |
-| `src/app/astral-codex/page.tsx` | Concept destination for the planned second game |
-| `src/games/relic-expedition/context/game-context.tsx` | Relic Expedition game state |
-| `src/contexts/settings-context.tsx` | Player settings (`useSettings`) |
-| `src/lib/providers/` | LLM integration |
-| `src/lib/session/api-session.ts` | Encrypted session cookie |
-| `src/types/llm.ts` | Provider and LLM type definitions |
-| `src/games/relic-expedition/types/` | Relic game type definitions |
+`next.config.ts` defines CSP, frame, content-type, referrer, permissions, and development-origin configuration.

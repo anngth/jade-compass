@@ -1,85 +1,37 @@
-# LLM Provider Development
+# LLM Providers
 
-## Architecture
+## Structure
 
-- **Base Provider** (`base.ts`) — LLM provider contract
-- **Provider Factory** (`provider-factory.ts`) — create/manage instances
-- **Provider Data** (`provider-data.ts`) — metadata, models, API base URLs
-- **Individual Providers** — per AI service impl
+`src/lib/providers/` contains:
 
+- `base.ts` - provider contract and shared prompt behavior
+- `provider-factory.ts` - selects an adapter
+- `provider-data.ts` - provider metadata and model options
+- `openai.ts`, `anthropic.ts`, `google.ts`, `mistral.ts` - direct API adapters
+- `vercel.ts` - OpenAI, Anthropic, Google, Groq, Mistral, and OpenRouter through AI SDK
+
+Direct OpenRouter uses the OpenAI-compatible adapter. The authoritative provider IDs and model lists are in `provider-data.ts` and `src/types/llm.ts`.
+
+## Request Path
+
+```text
+UI
+→ src/lib/api/llm-session.ts
+→ /api/generate-story or /api/test-connection
+→ src/lib/api/validate-llm-request.ts
+→ provider-factory.ts
+→ provider adapter
 ```
-src/lib/providers/
-├── base.ts
-├── provider-factory.ts
-├── provider-data.ts
-├── openai.ts          # OpenAI + OpenRouter (shared, diff API base)
-├── anthropic.ts
-├── google.ts
-├── mistral.ts
-└── vercel.ts          # All AI SDK providers
-```
 
-> OpenRouter **no separate file** — reuse `openai.ts`, diff API base.
+The client removes API keys from request bodies. The server reads them from the encrypted session and validates provider, model, and game configuration.
 
-## Registered Providers
+## Adding a Provider
 
-### Direct API
+1. Implement the provider contract in `src/lib/providers/`.
+2. Add its ID and types in `src/types/llm.ts`.
+3. Add metadata and models in `provider-data.ts`.
+4. Register it in `provider-factory.ts`.
+5. Add setup UI support if required.
+6. Test connection, successful generation, invalid output, and provider errors with mocked network responses.
 
-| ID | File | Models (examples) |
-|----|------|-------------------|
-| `openai` | `openai.ts` | gpt-5, gpt-5-mini, gpt-4o, gpt-4o-mini |
-| `openrouter` | `openai.ts` | deepseek, qwen, moonshotai (free tier) |
-| `anthropic` | `anthropic.ts` | claude-opus-4, claude-sonnet-4, claude-haiku-4-5 |
-| `google` | `google.ts` | gemini-3.5-flash, gemini-2.5-pro, gemini-2.5-flash |
-| `mistral` | `mistral.ts` | mistral-large, mistral-medium, ministral-8b |
-
-### AI SDK (via `vercel.ts`)
-
-| ID | Backend |
-|----|---------|
-| `openai-ai-sdk` | OpenAI |
-| `anthropic-ai-sdk` | Anthropic |
-| `google-ai-sdk` | Google Gemini |
-| `groq-ai-sdk` | Groq |
-| `mistral-ai-sdk` | Mistral |
-| `openrouter-ai-sdk` | OpenRouter |
-
-Models in `provider-data.ts`. Custom model via `__custom__`.
-
-## Best Practices
-
-- **Adapter Pattern** — same interface all providers
-- **Error Handling** — clear msgs, graceful recovery
-- **Type Safety** — strict response/error types
-- **Format Templates** — JSON templates (`plusFormat: true`) for parse consistency
-- **Testing** — mock network; no real API in dev
-- **CORS** — proper cross-origin config
-- **`testConnection()`** — meaningful error msgs
-
-## Add New Provider
-
-1. Create class in `src/lib/providers/`
-2. Implement base interface
-3. Add metadata + models to `provider-data.ts`
-4. Register in `provider-factory.ts`
-5. Update UI (`src/games/relic-expedition/components/setup/`)
-6. Test sample requests
-7. **Update docs** if arch change
-
-## Integration Layers
-
-### Client (`src/lib/api/llm-session.ts`, `src/games/relic-expedition/lib/api/generate-story.ts`)
-
-- `syncApiSession()` / `clearApiSession()` — encrypted session cookie
-- `generateStory()` / `testProviderConnection()` — call API routes (keys stripped from body)
-- Auto-retry 401 after re-sync session
-
-### Server (`src/lib/api/validate-llm-request.ts`)
-
-- Validate provider, model, game config on API routes
-- Read keys from encrypted cookie via `readSessionApiKeys()`
-- Used by `/api/generate-story`, `/api/test-connection`, `/api/session`
-
-### Hooks
-
-- `src/hooks/use-provider-data.ts` — lazy-load provider metadata for UI
+Keep adapters interchangeable, validate structured output, and return actionable errors without exposing credentials.

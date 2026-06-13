@@ -1,88 +1,48 @@
 # Development
 
+## Setup
+
+Use Node.js 20 and pnpm:
+
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+`SESSION_SECRET` is required in production to encrypt API keys. Generate one with `openssl rand -base64 32`. Provider keys are entered by the player and are not server environment variables.
+
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Dev server `http://localhost:3000` |
-| `pnpm build` | Production build |
-| `pnpm start` | Run prod build |
+| Command | Purpose |
+|---|---|
+| `pnpm dev` | Development server |
 | `pnpm lint` | ESLint |
-| `pnpm type-check` | TypeScript (`tsc --noEmit`) |
-| `pnpm audit` | Security audit deps |
-| `pnpm analyze` | Bundle analysis (`ANALYZE=true pnpm build`) |
-| `pnpm release` | Release + auto versioning |
-| `pnpm release:patch` | Patch release |
-| `pnpm release:minor` | Minor release |
-| `pnpm release:major` | Major release |
-| `pnpm changelog` | Extract changelog from commits |
+| `pnpm type-check` | TypeScript validation |
+| `pnpm build` | Production build |
+| `pnpm audit` | Dependency security audit |
+| `pnpm analyze` | Bundle analysis |
+| `pnpm release[:patch\|:minor\|:major]` | Release workflow |
+| `pnpm changelog` | Generate changelog content |
 
-> npm works too (`npm run dev`). Repo use **pnpm**.
+CI installs with the frozen lockfile, then runs type-check, audit, and build. Run lint locally because CI does not currently include it.
 
-**Node.js** — 18+ works; **20 recommended** (CI use Node 20).
+## Conventions
 
-## Environment
+- TypeScript strict mode; use explicit types at public boundaries.
+- Kebab-case filenames, PascalCase components, and `use-` prefixed hooks.
+- Use the `@/` alias for `src/`.
+- Prefer Tailwind classes and existing UI primitives.
+- Never log API keys.
+- Return meaningful errors and show user-facing failures through existing toast/error patterns.
 
-Copy `.env.example` → `.env.local`:
+## Change Checklist
 
-```bash
-cp .env.example .env.local
-```
+Before merging:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `SESSION_SECRET` | Prod only | Encrypt API keys in httpOnly cookie. Gen: `openssl rand -base64 32` |
+1. Run the relevant lint, type-check, build, audit, and tests.
+2. Include screenshots for visible UI changes.
+3. Update documentation only when its described behavior changes.
+4. Keep commits and pull requests focused.
 
-Dev: fallback secret when `SESSION_SECRET` unset. **Prod deploy without it = bad.**
-
-API keys from UI — not server env vars. See [API Key Flow](./state-management.md#api-key-flow).
-
-## CI
-
-`.github/workflows/ci.yml` on push/PR to `main`/`master`:
-
-1. `pnpm install --frozen-lockfile`
-2. `pnpm type-check`
-3. `pnpm audit --audit-level=moderate`
-4. `pnpm build`
-
-CI **no run lint** — run `pnpm lint` locally before PR.
-
-## Coding Style
-
-- **TypeScript** — strict; explicit types for public APIs
-- **Indent** — 2 spaces
-- **Files** — kebab-case (`game-context.tsx`, `use-provider-data.ts`)
-- **Components** — PascalCase in kebab files; default export for single component
-- **Hooks** — `use-` prefix, typed return
-- **Imports** — `@/` alias for `src/`
-- **Styling** — Tailwind; no inline styles
-- **Icons** — `lucide-react`
-
-## Debug
-
-`pnpm dev` auto-enable logs (`NODE_ENV=development`).
-
-Prod browser debug toggles (`logger.ts`):
-
-- URL query `?debug_logs=1`
-- `localStorage.setItem("DEBUG_LOGS", "1")`
-- `window.__DEBUG_LOGS__ = true`
-
-Also: browser console + React DevTools Profiler.
-
-## Troubleshooting Build
-
-```bash
-rm -rf node_modules .next
-pnpm install
-pnpm build
-```
-
-### TypeScript Errors
-
-```bash
-pnpm type-check
-```
-
-Fix: update types, add interfaces, fix imports/exports.
+Update the primary document for the changed area instead of copying the same information into multiple files.

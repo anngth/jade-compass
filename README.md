@@ -88,19 +88,19 @@ See [docs/llm-providers.md](./docs/llm-providers.md) for the full list and archi
 - **API Keys**: Stored in browser sessionStorage; synced to an encrypted httpOnly cookie via `/api/session`
 - **LLM Requests**: Handled server-side via API routes; keys are never included in request bodies
 - **Session**: Requires `SESSION_SECRET` in production (see `.env.example`)
-- **Rate Limiting**: Per-session (or per-IP fallback) via middleware
+- **Rate Limiting**: Per trusted client IP and API route group via `src/proxy.ts`
 - **Headers**: CSP, X-Frame-Options, and related security headers in `next.config.ts`
 
 See [docs/state-management.md](./docs/state-management.md) for the full API key flow.
 
 ## 📚 Documentation
 
-Technical documentation for contributors and agents:
+Technical documentation:
 
 - [docs/README.md](./docs/README.md) — Documentation index
 - [docs/architecture.md](./docs/architecture.md) — Project structure, API routes
 - [docs/development.md](./docs/development.md) — Environment, CI, commands
-- [AGENTS.md](./AGENTS.md) — Agent quick reference
+- [AGENTS.md](./AGENTS.md) — Repository instructions for coding agents
 
 ---
 

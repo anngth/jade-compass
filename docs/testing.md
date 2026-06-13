@@ -1,29 +1,24 @@
-# Testing Guidelines
+# Testing
 
-## Status
+There is no automated test runner yet. Until one is added, every change should run the relevant static checks and production build.
 
-No test runner yet.
+## Minimum Verification
 
-## When Add Tests
+```bash
+pnpm lint
+pnpm type-check
+pnpm build
+pnpm audit
+```
 
-- `*.test.ts` / `*.test.tsx` colocated or in `__tests__/`
-- React Testing Library for components
-- Mock `fetch` for provider calls
-- Add `"test": "vitest"` (or Jest) to `package.json`
+Manually verify affected routes and keyboard interaction for UI changes. Do not use real provider calls in routine tests.
 
-## Scope
+## Test Priorities
 
-| Layer | Guidance |
-|-------|----------|
-| Providers | Mock `src/lib/providers/` |
-| Components | Interactions, a11y, responsive |
-| Utilities | Unit test `response-parser.ts`, `string.ts`, `debounce.ts` |
-| API Routes | Mock LLM responses, validate errors |
-| Game Flow | Integration: home → game → victory/failure |
+When introducing a runner, prefer Vitest and React Testing Library. Add coverage in this order:
 
-## Checklist
-
-- [ ] Unit tests — utilities
-- [ ] Component tests — UI
-- [ ] Integration tests — game flow
-- [ ] E2E — critical paths
+1. Session encryption, request validation, and rate limiting.
+2. Story schemas, response parsing, and utility functions.
+3. Provider adapters with mocked network responses.
+4. Game transitions from setup through victory and failure.
+5. Critical route-level E2E flows.

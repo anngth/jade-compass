@@ -1,86 +1,35 @@
-# Repository Guidelines
+# Agent Instructions
 
-## Overview
+Jade Compass is a Next.js 16, React 19, TypeScript adventure-game hub. Relic Expedition is playable; Astral Codex is currently a concept route.
 
-**Jade Compass** — pixel-art home for Jade Compass adventure games. Relic Expedition is playable; Astral Codex is a concept destination. Next.js + React + TypeScript.
+## Working Rules
 
-**Repository**: [nguyenthanhan/jade-compass-relic-expedition](https://github.com/nguyenthanhan/jade-compass-relic-expedition)
+- Use `pnpm` and follow existing TypeScript, Tailwind, and component patterns.
+- Keep changes scoped. Do not refactor unrelated code.
+- Never log, persist, or send API keys in request bodies.
+- Preserve the retro adventure theme, keyboard access, and responsive behavior.
+- Search the repository before assuming a path or API is current.
+- Update the relevant document when behavior, structure, configuration, or security changes.
 
-## Tech Stack
+## Key Paths
 
-- **Framework** — Next.js 16 (App Router)
-- **Frontend** — React 19, TypeScript 5
-- **Styling** — Tailwind CSS 4
-- **UI** — shadcn/ui, Radix UI, Lucide Icons
-- **Validation** — Zod
-- **Package Manager** — pnpm
-- **Deployment** — Vercel
+- `src/app/` - routes and API handlers
+- `src/games/relic-expedition/` - game UI, state, schemas, and story flow
+- `src/lib/providers/` - direct and AI SDK LLM adapters
+- `src/lib/session/` - encrypted API-key session
+- `src/contexts/settings-context.tsx` - player settings
+- `src/proxy.ts` - API rate limits and session guard
+- `next.config.ts` - Next.js and security-header configuration
 
-## Documentation
+## Verification
 
-Full docs in [`docs/`](./docs/README.md):
-
-| Document                                               | Contents                          |
-| ------------------------------------------------------ | --------------------------------- |
-| [docs/architecture.md](./docs/architecture.md)         | Structure, API routes, middleware |
-| [docs/game-logic.md](./docs/game-logic.md)             | States, flow, story gen           |
-| [docs/development.md](./docs/development.md)           | Commands, env, CI                 |
-| [docs/ui-ux.md](./docs/ui-ux.md)                       | Design system, CSS vars           |
-| [docs/llm-providers.md](./docs/llm-providers.md)       | Providers, add new                |
-| [docs/state-management.md](./docs/state-management.md) | Context, API key flow, security   |
-| [docs/agent-guide.md](./docs/agent-guide.md)           | Agent quick start, tasks          |
-| [docs/contributing.md](./docs/contributing.md)         | Commits, PRs, doc standards       |
-| [docs/testing.md](./docs/testing.md)                   | Test guidelines                   |
-| [docs/future.md](./docs/future.md)                     | Roadmap, tech debt                |
-
-Index: [docs/README.md](./docs/README.md)
-
-## Quick Reference
-
-### Entry Points
-
-- `src/app/page.tsx` — Jade Compass home linking to adventure games
-- `src/app/relic-expedition/page.tsx` — Relic Expedition game routing (dynamic imports)
-- `src/app/astral-codex/page.tsx` — Astral Codex concept page
-- `src/games/relic-expedition/context/game-context.tsx` — Relic game state
-- `src/contexts/settings-context.tsx` — settings (`useSettings`)
-- `src/lib/providers/` — LLM integration
-- `src/lib/session/api-session.ts` — encrypted session cookie
-- `src/middleware.ts` — rate limit + session guard
-- `src/types/llm.ts` — provider/LLM types
-- `src/games/relic-expedition/types/` — Relic game types
-
-### Commands
+Run the checks relevant to the change:
 
 ```bash
-pnpm dev          # Dev server http://localhost:3000
-pnpm build        # Prod build
-pnpm lint         # ESLint
-pnpm type-check   # TypeScript
-pnpm analyze      # Bundle analysis
+pnpm lint
+pnpm type-check
+pnpm build
+pnpm audit
 ```
 
-### Structure (summary)
-
-```
-src/
-├── app/api/          # generate-story, session, test-connection
-├── components/       # shared/, ui/
-├── contexts/         # settings-context
-├── games/            # relic-expedition feature code
-├── hooks/            # use-provider-data
-├── lib/              # providers/, api/, schemas/, session/
-├── middleware.ts
-├── types/            # platform/shared types
-└── utils/
-```
-
-## Agent Guidelines
-
-- **Docs** — code ≠ description → update docs. See [contributing](./docs/contributing.md#documentation-standards)
-- **Paths wrong** — search codebase, fix docs
-- **Tasks** — see [agent-guide](./docs/agent-guide.md)
-
----
-
-Treasure hunt game. Keep theme consistent. Adventure engaging.
+Documentation index: [`docs/README.md`](./docs/README.md).
