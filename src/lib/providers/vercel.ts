@@ -8,14 +8,11 @@ import { createGroq, GroqProvider } from "@ai-sdk/groq";
 import { createMistral, MistralProvider } from "@ai-sdk/mistral";
 import {
   createOpenRouter,
-  LanguageModelV2,
+  LanguageModelV3,
   OpenRouterProvider,
 } from "@openrouter/ai-sdk-provider";
 import { generateObject, generateText } from "ai";
-import {
-  ContentLanguageType,
-  AISDKProviderType,
-} from "@/types/llm";
+import { ContentLanguageType, AISDKProviderType } from "@/types/llm";
 import { IFullStoryResponse } from "@/games/relic-expedition/types";
 import { BaseLLMProvider } from "./base";
 import {
@@ -59,7 +56,7 @@ export class VercelAIProvider extends BaseLLMProvider {
     }
   }
 
-  private getAIModel(): LanguageModelV2 {
+  private getAIModel(): LanguageModelV3 {
     switch (this.aiProvider) {
       case "openai-ai-sdk":
         if (!this.openai) {
