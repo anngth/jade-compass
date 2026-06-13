@@ -21,6 +21,8 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.1.27"],
+
   compiler: {
     removeConsole: isProd
       ? {
