@@ -25,7 +25,7 @@ pnpm dev
 | `pnpm release[:patch\|:minor\|:major]` | Release workflow |
 | `pnpm changelog` | Generate changelog content |
 
-CI (`ci.yml`) installs with the frozen lockfile, then runs type-check, audit, and build. Run lint locally because CI does not currently include it.
+CI (`ci.yml`) installs with the frozen lockfile, then runs type-check and build. Run lint and audit locally because CI does not currently include them.
 
 ## Deployment
 
