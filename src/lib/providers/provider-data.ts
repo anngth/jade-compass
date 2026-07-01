@@ -1,41 +1,31 @@
-import { ProviderDataType } from "@/types/llm";
+import { IProviderConfig, ProviderDataType, ProviderType } from "@/types/llm";
 
 // ─── OpenAI ──────────────────────────────────────────────────────────────────
-// Removed: gpt-5-chat-latest (non-standard), gpt-4-turbo / gpt-4 / gpt-3.5-turbo
-//          (all shutting down 2026-10-23 per OpenAI deprecations page)
+// Current text-capable API model options, checked against OpenAI docs on 2026-06-14.
 const OPENAI_MODELS = [
-  { value: "gpt-5" },
-  { value: "gpt-5-mini" },
-  { value: "gpt-5-nano" },
-  { value: "gpt-4o" },
-  { value: "gpt-4o-mini" },
+  { value: "gpt-5.5" },
+  { value: "gpt-5.4" },
+  { value: "gpt-5.4-mini" },
+  { value: "gpt-5.4-nano" },
   { value: "__custom__", label: "Custom Model (Enter below)" },
 ];
 
 // ─── Anthropic ───────────────────────────────────────────────────────────────
-// Removed: claude-opus-4-20250514 / claude-sonnet-4-20250514 (retire 2026-06-15)
-//          claude-3-7-sonnet-latest / -20250219 (retired 2026-02-19)
-//          claude-3-5-sonnet-latest / claude-3-5-haiku-20241022 (retired 2026-02-19)
-//          claude-3-haiku-20240307 (retired 2026-04-20)
+// Current Claude API IDs, checked against Anthropic docs on 2026-06-14.
 const ANTHROPIC_MODELS = [
-  { value: "claude-opus-4-latest" },
-  { value: "claude-sonnet-4-latest" },
-  { value: "claude-opus-4-7" },
-  { value: "claude-opus-4-6" },
+  { value: "claude-fable-5" },
+  { value: "claude-opus-4-8" },
   { value: "claude-sonnet-4-6" },
-  { value: "claude-sonnet-4-5-20250929" },
   { value: "claude-haiku-4-5-20251001" },
-  { value: "claude-opus-4-1-20250805" },
   { value: "__custom__", label: "Custom Model (Enter below)" },
 ];
 
 // ─── Google ───────────────────────────────────────────────────────────────────
-// Removed: gemini-2.0-flash / gemini-2.0-flash-exp (shutdown 2026-06-01, 6 days away)
-//          gemini-1.5-flash / gemini-1.5-pro (both retired 2025)
-// Added:   gemini-3.5-flash (released 2026-05-19, no retirement date)
-//          gemini-3.1-flash-lite (released 2026-05-07, no retirement date)
+// Current Gemini API text-output model options, checked against Google docs on 2026-06-14.
 const GOOGLE_MODELS = [
   { value: "gemini-3.5-flash" },
+  { value: "gemini-3.1-pro-preview" },
+  { value: "gemini-3-flash-preview" },
   { value: "gemini-3.1-flash-lite" },
   { value: "gemini-2.5-pro" },
   { value: "gemini-2.5-flash" },
@@ -44,47 +34,36 @@ const GOOGLE_MODELS = [
 ];
 
 // ─── Groq ─────────────────────────────────────────────────────────────────────
-// Removed: mixtral-8x7b-32768 (deprecated 2025-03-20), gemma2-9b-it (deprecated 2025-08-08)
-// Added:   qwen/qwen3-32b (current replacement for Mixtral on Groq)
-//          openai/gpt-oss-120b (current flagship on Groq)
+// Groq docs expose the Models API as the source of truth for active IDs.
 const GROQ_MODELS = [
-  { value: "meta-llama/llama-4-scout-17b-16e-instruct" },
   { value: "openai/gpt-oss-120b" },
-  { value: "qwen/qwen3-32b" },
+  { value: "meta-llama/llama-4-scout-17b-16e-instruct" },
   { value: "llama-3.3-70b-versatile" },
   { value: "llama-3.1-8b-instant" },
+  { value: "qwen/qwen3-32b" },
   { value: "__custom__", label: "Custom Model (Enter below)" },
 ];
 
 // ─── Mistral ──────────────────────────────────────────────────────────────────
-// Removed: pixtral-large-latest (deprecated — replaced by newer vision models)
-//          pixtral-12b-2409 (deprecated 2025-12-02)
-// Added:   ministral-8b-latest (lightweight, fast)
-//          magistral-medium-2506 (June 2026 reasoning model)
+// Current generalist chat models, checked against Mistral docs on 2026-06-14.
 const MISTRAL_MODELS = [
-  { value: "mistral-large-latest" },
-  { value: "mistral-medium-latest" },
-  { value: "mistral-small-latest" },
-  { value: "magistral-medium-2506" },
-  { value: "mistral-medium-2505" },
-  { value: "ministral-8b-latest" },
+  { value: "mistral-medium-3-5" },
+  { value: "mistral-small-2603" },
+  { value: "mistral-large-2512" },
+  { value: "ministral-3-14b-2512" },
+  { value: "ministral-3-8b-2512" },
+  { value: "ministral-3-3b-2512" },
   { value: "__custom__", label: "Custom Model (Enter below)" },
 ];
 
 // ─── OpenRouter (free tier) ───────────────────────────────────────────────────
-// Kept recent free models; gemini-2.0-flash-exp may stop working ~2026-06-01
+// Current free models from OpenRouter's public Models API, checked on 2026-06-14.
 const OPENROUTER_MODELS = [
-  { value: "deepseek/deepseek-chat-v3-0324:free" },
-  { value: "deepseek/deepseek-r1-0528:free" },
-  { value: "moonshotai/kimi-k2:free" },
-  { value: "qwen/qwen3-235b-a22b:free" },
-  { value: "microsoft/mai-ds-r1:free" },
-  { value: "meta-llama/llama-3.3-70b-instruct:free" },
+  { value: "nex-agi/nex-n2-pro:free" },
+  { value: "nvidia/nemotron-3-ultra-550b-a55b:free" },
   { value: "openai/gpt-oss-20b:free" },
-  { value: "qwen/qwen3-14b:free" },
-  { value: "mistralai/mistral-small-3.2-24b-instruct:free" },
-  { value: "google/gemma-3-27b-it:free" },
-  { value: "z-ai/glm-4.5-air:free" },
+  { value: "deepseek/deepseek-r1-0528:free" },
+  { value: "qwen/qwen3-235b-a22b:free" },
   { value: "__custom__", label: "Custom Model (Enter below)" },
 ];
 
@@ -109,7 +88,7 @@ export const providerData: ProviderDataType = {
     apiBase: "https://api.anthropic.com/v1",
     link: "console.anthropic.com/account/keys",
     models: ANTHROPIC_MODELS,
-    defaultModel: ANTHROPIC_MODELS[1].value, // claude-sonnet-4-latest
+    defaultModel: ANTHROPIC_MODELS[2].value, // claude-sonnet-4-6
   },
   google: {
     providerName: "Google",
@@ -138,7 +117,7 @@ export const providerData: ProviderDataType = {
     apiBase: "https://api.anthropic.com",
     link: "console.anthropic.com/account/keys",
     models: ANTHROPIC_MODELS,
-    defaultModel: ANTHROPIC_MODELS[1].value,
+    defaultModel: ANTHROPIC_MODELS[2].value,
   },
   "google-ai-sdk": {
     providerName: "Google (AI SDK)",
@@ -169,3 +148,50 @@ export const providerData: ProviderDataType = {
     defaultModel: OPENROUTER_MODELS[0].value,
   },
 };
+
+/** Normalize saved settings when a provider model list changes. */
+export function resolveSavedProviderModel(
+  provider: ProviderType,
+  config: Pick<IProviderConfig, "model" | "customModel">,
+): Pick<IProviderConfig, "model" | "customModel"> {
+  const providerInfo = providerData[provider];
+  if (!providerInfo) {
+    return {
+      model: config.model,
+      customModel: config.customModel,
+    };
+  }
+
+  if (config.model === "__custom__") {
+    return {
+      model: "__custom__",
+      customModel: config.customModel?.trim() || "",
+    };
+  }
+
+  const selectedModel = config.model ?? providerInfo.defaultModel;
+  const knownModels = providerInfo.models.map((entry) => entry.value);
+  if (knownModels.includes(selectedModel)) {
+    return {
+      model: selectedModel,
+      customModel: config.customModel,
+    };
+  }
+
+  return {
+    model: providerInfo.defaultModel,
+    customModel: "",
+  };
+}
+
+/** Resolve a saved or configured model to a provider API model ID. */
+export function resolveProviderModel(
+  provider: ProviderType,
+  config: Pick<IProviderConfig, "model" | "customModel">,
+): string {
+  const saved = resolveSavedProviderModel(provider, config);
+  if (saved.model === "__custom__" && saved.customModel?.trim()) {
+    return saved.customModel.trim();
+  }
+  return saved.model ?? providerData[provider]?.defaultModel ?? "";
+}

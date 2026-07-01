@@ -1,37 +1,31 @@
-# State and Security
+# State & Security
 
-## State
+## Client state
 
-- `src/contexts/settings-context.tsx` stores rounds, choices, language, provider, and model through `useSettings()`.
-- `src/games/relic-expedition/context/game-context.tsx` stores the active story, round, choices, and outcome through `useGame()`.
-- Non-secret settings are debounced into `localStorage`.
-- API keys are held separately in `sessionStorage` and disappear when the tab closes.
+| Context | Stores |
+| --- | --- |
+| `settings-context.tsx` | Rounds, choices, language, provider, model |
+| `game-context.tsx` | Active story, round, choice history, outcome |
 
-## API-Key Session
+Settings (non-secret) debounce to `localStorage`. API keys live in `sessionStorage` and clear when the tab closes.
+
+## API-key session
 
 ```text
-UI API key
-→ sessionStorage
-→ POST /api/session
-→ encrypted httpOnly cookie
-→ server-side provider call
+UI key → sessionStorage → POST /api/session → encrypted httpOnly cookie → server provider call
 ```
 
-Security invariants:
+- Keys never appear in story or connection request bodies.
+- Cookie: httpOnly, `sameSite=lax`, secure in production, 24h expiry.
+- Payload: AES-GCM; requires `SESSION_SECRET` in production.
+- 401 triggers one client re-sync and retry.
+- Legacy keys removed from `localStorage`.
 
-- Story and connection request bodies never contain API keys.
-- The cookie is httpOnly, `sameSite=lax`, secure in production, and expires after 24 hours.
-- AES-GCM protects the payload; `SESSION_SECRET` is required in production.
-- A 401 response triggers one client session re-sync and retry.
-- Legacy keys are removed from `localStorage`.
+Implementation: `src/lib/session/`, client sync in `src/lib/api/llm-session.ts`.
 
-Session implementation lives in `src/lib/session/`; client synchronization lives in `src/lib/api/llm-session.ts`.
+## Other controls
 
-## Other Controls
-
-- Zod validates API and LLM data.
-- `src/proxy.ts` applies IP-based rate limits and protects LLM endpoints.
-- `next.config.ts` defines browser security headers.
-- API keys must never be committed or logged.
-
-See [Architecture](./architecture.md#request-protection) for exact rate-limit values.
+- Zod validation on API and LLM payloads.
+- Rate limits and session guard in `src/proxy.ts` (see [Architecture](./architecture.md#request-protection)).
+- Security headers in `next.config.ts`.
+- Never commit or log API keys.

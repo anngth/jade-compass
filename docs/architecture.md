@@ -1,52 +1,46 @@
 # Architecture
 
-Jade Compass uses the Next.js 16 App Router API, React 19, TypeScript, Tailwind CSS 4, Zod, and pnpm. It runs on [vinext](https://github.com/cloudflare/vinext) (a Vite-based Next.js reimplementation) and deploys to Cloudflare Workers, configured via `wrangler.jsonc`. Cloudflare's Git integration (Workers Builds) builds and deploys automatically on push; see [Development](./development.md#deployment).
+React 19 · TypeScript · Next.js 16 App Router API · Tailwind CSS 4 · Zod · pnpm · [vinext](https://github.com/cloudflare/vinext) · Cloudflare Workers (`wrangler.jsonc`).
 
-## Runtime Structure
+## Layout
 
 ```text
 src/
-├── app/
-│   ├── api/                    # session, story generation, provider test
-│   ├── relic-expedition/       # playable game route
-│   └── astral-codex/           # concept route
-├── components/                 # shared and primitive UI
-├── contexts/                   # application settings
-├── games/relic-expedition/     # game feature
-├── hooks/                      # shared React hooks
+├── app/                    # routes and API handlers
+│   ├── api/                # session, generate-story, test-connection
+│   ├── relic-expedition/
+│   └── astral-codex/
+├── components/ui/          # shared primitives
+├── contexts/               # settings
+├── games/relic-expedition/ # game UI, state, schemas
 ├── lib/
-│   ├── api/                    # client/server request helpers
-│   ├── providers/              # LLM adapters
-│   ├── schemas/                # platform validation
-│   └── session/                # encrypted API-key cookie
-├── proxy.ts                    # API protection
-├── types/
-└── utils/
+│   ├── api/                # client/server helpers
+│   ├── providers/          # LLM adapters
+│   ├── session/            # encrypted API-key cookie
+│   └── schemas/
+├── proxy.ts                # API rate limits and session guard
+└── types/
 ```
 
-`src/app/layout.tsx` provides the error boundary and settings context. Relic Expedition adds its game context and selects screens from `gameState.status`.
+`src/app/layout.tsx` wraps the app with settings context and an error boundary. Relic Expedition adds `GameProvider` and switches screens from `gameState.status`.
 
-## API
-
-Routes run in the Cloudflare Workers runtime (`nodejs_compat` enabled in `wrangler.jsonc`). `src/proxy.ts` runs as Next.js 16 Proxy (Node.js runtime by default). vinext ignores the per-route `runtime` segment config, so any `export const runtime = "edge"` left in route files has no effect under this deployment.
+## API routes
 
 | Route | Methods | Purpose |
-|---|---|---|
-| `/api/session` | POST, DELETE | Create or clear the encrypted API-key session |
-| `/api/generate-story` | POST | Generate and validate a complete story |
-| `/api/test-connection` | POST | Verify the selected provider |
+| --- | --- | --- |
+| `/api/session` | POST, DELETE | Create or clear encrypted API-key session |
+| `/api/generate-story` | POST | Generate and validate a full story |
+| `/api/test-connection` | POST | Verify provider connectivity |
 
-API keys come from the encrypted cookie, never from story or connection request bodies.
+API keys come from the encrypted cookie, never from request bodies. Routes run on Cloudflare Workers (`nodejs_compat`). Per-route `export const runtime = "edge"` has no effect under vinext.
 
-## Request Protection
+## Request protection
 
-`src/proxy.ts` applies:
+`src/proxy.ts`:
 
-- 5 requests/minute per trusted client IP for `/api/session`
-- 10 requests/minute per trusted client IP for other API routes
-- a 5,000-key in-memory store with oldest-key eviction
-- a session-cookie requirement for story generation and connection tests
+- 5 req/min per IP on `/api/session`
+- 10 req/min per IP on other API routes
+- In-memory store (5,000 keys, oldest evicted first) — per instance, not global
+- Session cookie required for story generation and connection tests
 
-The store is per process, so limits are not globally consistent across serverless instances. Use a distributed store if strict global enforcement becomes necessary.
-
-`next.config.ts` defines CSP, frame, content-type, referrer, permissions, and development-origin configuration.
+Security headers (CSP, frame options, etc.) are in `next.config.ts`.

@@ -1,28 +1,34 @@
 # UI/UX
 
-## Visual System
+## Themes
 
-- `/` uses midnight teal and orange.
-- `/relic-expedition` uses parchment, jade green, and gold.
-- `/astral-codex` uses violet and cyan.
-- Orbitron is used for display text and Space Mono for body text.
-- Pixel assets use crisp rendering and restrained CSS animation.
+| Route | Palette |
+| --- | --- |
+| `/` | Midnight teal and orange |
+| `/relic-expedition` | Parchment, jade green, gold |
+| `/astral-codex` | Violet and cyan |
 
-Theme tokens and scoped route themes live in `src/app/globals.css`. Reuse existing variables and primitives from `src/components/ui/` instead of introducing one-off styling.
+Orbitron (display) · Space Mono (body) · crisp pixel assets · restrained CSS animation.
 
-## Component Ownership
+Tokens and route themes: `src/app/globals.css`. Reuse `src/components/ui/` primitives.
+
+## Component paths
 
 | Area | Path |
-|---|---|
-| Shared primitives | `src/components/ui/` |
-| Cross-game components | `src/components/shared/` |
+| --- | --- |
+| Primitives | `src/components/ui/` |
+| Shared | `src/components/shared/` |
 | Relic setup | `src/games/relic-expedition/components/setup/` |
 | Relic screens | `src/games/relic-expedition/components/screens/` |
 
-## Interaction Requirements
+## Interaction
 
-- Preserve keyboard navigation and visible focus states.
-- Keep number-key choice shortcuts where applicable.
-- Add ARIA labels to controls without visible labels.
-- Maintain mobile layouts and readable contrast.
-- Use Sonner for transient feedback and the shared error boundary for render failures.
+- Keyboard navigation and visible focus states.
+- Number-key shortcuts for choices where applicable.
+- ARIA labels on unlabeled controls.
+- Mobile-friendly layout and contrast.
+- Sonner toasts; shared error boundary for render failures.
+
+## Relic Expedition game screen
+
+Primary path: current scene → choices. HUD shows round, location, status, items, progress using `sceneSummary` and `shortStatus`. Previous consequences and scene details collapsed by default. Choice cards are keyboard-reachable (Tab/Enter/Space) in addition to number keys.

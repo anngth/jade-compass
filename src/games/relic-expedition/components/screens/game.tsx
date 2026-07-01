@@ -1,11 +1,19 @@
 "use client";
 
-import React, { memo, useEffect, useState, useCallback, useMemo } from "react";
+import React, { memo, useEffect, useState, useCallback } from "react";
 import { useGame } from "@/games/relic-expedition/context/game-context";
 import { useSettings } from "@/contexts/settings-context";
 import { IChoice } from "@/games/relic-expedition/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  MapPin,
+  Package,
+  Route,
+  Sparkles,
+} from "lucide-react";
 
 interface ChoiceCardProps {
   choice: IChoice;
@@ -14,24 +22,73 @@ interface ChoiceCardProps {
   onClick: () => void;
 }
 
+interface HudChipProps {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}
+
+const HudChip = memo(function HudChip({
+  icon: Icon,
+  label,
+  value,
+}: HudChipProps) {
+  return (
+    <div className="min-w-0 border border-[var(--border)] bg-[var(--muted)]/10 px-3 py-2">
+      <div className="flex items-center gap-2">
+        <Icon
+          className="h-4 w-4 shrink-0 text-[var(--primary)]"
+          aria-hidden="true"
+        />
+        <div className="min-w-0">
+          <p className="font-pixel text-[10px] uppercase text-[var(--muted-foreground)]">
+            {label}
+          </p>
+          <p
+            className="truncate font-retro text-sm text-[var(--card-foreground)]"
+            title={value}
+          >
+            {value}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 const ChoiceCard = memo(function ChoiceCard({
   choice,
   index,
   className,
   onClick,
 }: ChoiceCardProps) {
+  const choiceLabel = `Choice ${index + 1}: ${choice.title}. ${choice.summary}`;
+
   return (
-    <Card key={choice.id} className={className} onClick={onClick}>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>{choice.title}</span>
-          <span className="font-pixel text-sm text-[var(--muted-foreground)]">
-            [{index + 1}]
+    <Card
+      key={choice.id}
+      className={className}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={choiceLabel}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+    >
+      <CardHeader className="pb-3">
+        <CardTitle className="grid grid-cols-[auto_1fr] items-start gap-3 text-base leading-6">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center border border-[var(--border)] font-pixel text-xs text-[var(--primary)]">
+            {index + 1}
           </span>
+          <span className="min-w-0">{choice.title}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="font-retro text-[var(--muted-foreground)]">
+        <p className="font-retro text-sm leading-6 text-[var(--muted-foreground)]">
           {choice.summary}
         </p>
       </CardContent>
@@ -45,6 +102,12 @@ export function GamePage() {
 
   const [selectedChoice, setSelectedChoice] = useState<IChoice | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastResultRoundOpen, setLastResultRoundOpen] = useState<number | null>(
+    null,
+  );
+  const [sceneDetailsRoundOpen, setSceneDetailsRoundOpen] = useState<
+    number | null
+  >(null);
 
   const handleChoice = useCallback(
     async (choice: IChoice) => {
@@ -63,7 +126,7 @@ export function GamePage() {
         setSelectedChoice(null);
       }
     },
-    [isProcessing, makeChoice]
+    [isProcessing, makeChoice],
   );
 
   const handleKeyDown = useCallback(
@@ -93,25 +156,14 @@ export function GamePage() {
         handleChoice(choice);
       }
     },
-    [currentRoundData, isProcessing, handleChoice]
+    [currentRoundData, isProcessing, handleChoice],
   );
-
-  // Memoize the items display logic
-  const itemsDisplay = useMemo(() => {
-    const items =
-      currentRoundData?.narrativeState.initItems ??
-      gameState.narrativeState.initItems ??
-      [];
-    return items.length ? items.join(", ") : "None";
-  }, [
-    currentRoundData?.narrativeState.initItems,
-    gameState.narrativeState.initItems,
-  ]);
 
   // Memoize choice card class names
   const getChoiceCardClassName = useCallback(
     (choice: IChoice) => {
-      const baseClasses = "cursor-pointer transition-all hover:scale-105";
+      const baseClasses =
+        "cursor-pointer transition-all hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]";
       const selectedClasses =
         selectedChoice?.id === choice.id ? "ring-4 ring-[var(--primary)]" : "";
       const processingClasses =
@@ -119,7 +171,7 @@ export function GamePage() {
 
       return `${baseClasses} ${selectedClasses} ${processingClasses}`.trim();
     },
-    [selectedChoice?.id, isProcessing]
+    [selectedChoice?.id, isProcessing],
   );
 
   // Memoize choice click handler
@@ -127,7 +179,7 @@ export function GamePage() {
     (choice: IChoice) => {
       return () => handleChoice(choice);
     },
-    [handleChoice]
+    [handleChoice],
   );
 
   useEffect(() => {
@@ -146,111 +198,194 @@ export function GamePage() {
     );
   }
 
+  const items =
+    currentRoundData.narrativeState.initItems ??
+    gameState.narrativeState.initItems ??
+    [];
+  const itemsDisplay = items.length ? items.join(", ") : "None";
+  const currentLocation =
+    currentRoundData.narrativeState.location ||
+    gameState.narrativeState.location;
+  const currentStatus =
+    currentRoundData.narrativeState.shortStatus ||
+    gameState.narrativeState.shortStatus ||
+    currentRoundData.narrativeState.status ||
+    gameState.narrativeState.status;
+  const currentProgress =
+    currentRoundData.narrativeState.storyProgress ||
+    gameState.narrativeState.storyProgress;
+  const lastChoice =
+    gameState.choiceHistory[gameState.choiceHistory.length - 1];
+  const sceneSummary = currentRoundData.sceneSummary || currentRoundData.intro;
+  const hasSceneDetails =
+    currentRoundData.intro && currentRoundData.intro !== sceneSummary;
+  const showLastResult = lastResultRoundOpen === gameState.currentRound;
+  const showSceneDetails = sceneDetailsRoundOpen === gameState.currentRound;
+  const sceneDetailsPanelId = `scene-details-panel-${gameState.currentRound}`;
+  const lastResultPanelId = `last-result-panel-${gameState.currentRound}`;
+
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          {gameState.overallTheme && (
-            <h1 className="font-pixel text-3xl text-[var(--accent)] mb-4">
-              {gameState.overallTheme}
-            </h1>
-          )}
-          <h2 className="font-pixel text-2xl text-[var(--primary)]">
-            Round {gameState.currentRound} of {settings?.gameConfig?.rounds}
-          </h2>
-          {gameState.intro && gameState.currentRound === 1 && (
-            <p className="font-retro text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
-              {gameState.intro}
+    <div className="min-h-screen px-3 py-4 sm:px-4">
+      <div className="mx-auto max-w-5xl space-y-4">
+        <div className="flex flex-col gap-3 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            {gameState.overallTheme && (
+              <h1 className="truncate font-pixel text-xl text-[var(--accent)] sm:text-2xl">
+                {gameState.overallTheme}
+              </h1>
+            )}
+            {gameState.intro && gameState.currentRound === 1 && (
+              <p className="mt-2 max-w-3xl font-retro text-sm leading-6 text-[var(--muted-foreground)] sm:text-base">
+                {gameState.intro}
+              </p>
+            )}
+          </div>
+          <div className="shrink-0 border border-[var(--border)] bg-[var(--primary)]/10 px-3 py-2 text-left sm:text-right">
+            <p className="font-pixel text-[10px] uppercase text-[var(--muted-foreground)]">
+              Round
             </p>
-          )}
+            <p className="font-pixel text-lg text-[var(--primary)]">
+              {gameState.currentRound}/{settings?.gameConfig?.rounds}
+            </p>
+          </div>
         </div>
 
-        <Card>
-          <CardContent className="pt-4">
-            <div className="grid grid-cols-2 gap-4 text-base font-retro mb-4">
-              <div>
-                <span className="text-[var(--muted-foreground)]">
-                  Location:{" "}
-                </span>
-                <span className="text-[var(--accent)]">
-                  {currentRoundData?.narrativeState.location ||
-                    gameState.narrativeState.location}
-                </span>
-              </div>
-              <div>
-                <span className="text-[var(--muted-foreground)]">Status: </span>
-                <span className="text-[var(--primary)]">
-                  {currentRoundData?.narrativeState.status ||
-                    gameState.narrativeState.status}
-                </span>
-              </div>
-              <div>
-                <span className="text-[var(--muted-foreground)]">Items: </span>
-                <span>{itemsDisplay}</span>
-              </div>
-              {(currentRoundData?.narrativeState.storyProgress ||
-                gameState.narrativeState.storyProgress) && (
-                <div>
-                  <span className="text-[var(--muted-foreground)]">
-                    Progress:{" "}
-                  </span>
-                  <span className="text-[var(--accent)]">
-                    {currentRoundData?.narrativeState.storyProgress ||
-                      gameState.narrativeState.storyProgress}
-                  </span>
-                </div>
-              )}
-            </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <HudChip icon={MapPin} label="Location" value={currentLocation} />
+          <HudChip icon={Sparkles} label="Status" value={currentStatus} />
+          <HudChip icon={Package} label="Items" value={itemsDisplay} />
+        </div>
+        {currentProgress && (
+          <HudChip icon={Route} label="Progress" value={currentProgress} />
+        )}
 
-            {currentRoundData?.intro && (
-              <div className="border-t border-[var(--border)] pt-4">
-                <h3 className="font-pixel text-sm text-[var(--primary)] mb-2">
-                  Round Description
-                </h3>
-                <p className="font-retro text-sm text-[var(--muted-foreground)] mb-2">
-                  {currentRoundData.intro}
+        <Card>
+          <CardContent className="space-y-4 pt-4">
+            {sceneSummary && (
+              <div>
+                <h2 className="mb-2 font-pixel text-sm uppercase text-[var(--primary)]">
+                  Current Scene
+                </h2>
+                <p className="font-retro text-base leading-7 text-[var(--card-foreground)]">
+                  {sceneSummary}
                 </p>
               </div>
             )}
 
-            {gameState.choiceHistory.length > 0 &&
-              gameState.currentRound > 1 && (
-                <div className="border-t border-[var(--border)] pt-4">
-                  <h3 className="font-pixel text-sm text-[var(--primary)] mb-2">
-                    Previous Choice Result
-                  </h3>
-                  <div className="p-3 bg-[var(--accent)]/10 rounded">
-                    <p className="font-retro text-xs font-semibold text-[var(--primary)] mb-1">
-                      {
-                        gameState.choiceHistory[
-                          gameState.choiceHistory.length - 1
-                        ]?.title
-                      }
-                    </p>
-                    <p className="font-retro text-sm text-[var(--muted-foreground)]">
-                      {
-                        gameState.choiceHistory[
-                          gameState.choiceHistory.length - 1
-                        ]?.consequence
-                      }
-                    </p>
-                  </div>
-                </div>
-              )}
+            {hasSceneDetails && (
+              <div className="border-t border-[var(--border)] pt-4">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-3 text-left"
+                  onClick={() =>
+                    setSceneDetailsRoundOpen((round) =>
+                      round === gameState.currentRound
+                        ? null
+                        : gameState.currentRound,
+                    )
+                  }
+                  aria-expanded={showSceneDetails}
+                  aria-controls={sceneDetailsPanelId}
+                >
+                  <span className="font-pixel text-xs uppercase text-[var(--muted-foreground)]">
+                    Scene Details
+                  </span>
+                  {showSceneDetails ? (
+                    <ChevronUp
+                      className="h-5 w-5 shrink-0 text-[var(--muted-foreground)]"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <ChevronDown
+                      className="h-5 w-5 shrink-0 text-[var(--muted-foreground)]"
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
+                {showSceneDetails && (
+                  <p
+                    id={sceneDetailsPanelId}
+                    className="mt-3 font-retro text-sm leading-6 text-[var(--muted-foreground)]"
+                  >
+                    {currentRoundData.intro}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {lastChoice && gameState.currentRound > 1 && (
+              <div className="border-t border-[var(--border)] pt-4">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-3 text-left"
+                  onClick={() =>
+                    setLastResultRoundOpen((round) =>
+                      round === gameState.currentRound
+                        ? null
+                        : gameState.currentRound,
+                    )
+                  }
+                  aria-expanded={showLastResult}
+                  aria-controls={lastResultPanelId}
+                >
+                  <span className="min-w-0">
+                    <span className="block font-pixel text-xs uppercase text-[var(--muted-foreground)]">
+                      Last Result
+                    </span>
+                    <span className="block truncate font-retro text-sm font-semibold text-[var(--primary)]">
+                      {lastChoice.title}
+                    </span>
+                  </span>
+                  {showLastResult ? (
+                    <ChevronUp
+                      className="h-5 w-5 shrink-0 text-[var(--muted-foreground)]"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <ChevronDown
+                      className="h-5 w-5 shrink-0 text-[var(--muted-foreground)]"
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
+                {showLastResult && (
+                  <p
+                    id={lastResultPanelId}
+                    className="mt-3 bg-[var(--accent)]/10 p-3 font-retro text-sm leading-6 text-[var(--muted-foreground)]"
+                  >
+                    {lastChoice.consequence}
+                  </p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {currentRoundData?.choices.map((choice, index) => (
-            <ChoiceCard
-              key={choice.id}
-              choice={choice}
-              index={index}
-              className={getChoiceCardClassName(choice)}
-              onClick={createChoiceClickHandler(choice)}
-            />
-          ))}
-        </div>
+        <section aria-labelledby="choices-heading" className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2
+              id="choices-heading"
+              className="font-pixel text-sm uppercase text-[var(--primary)]"
+            >
+              Choose Your Move
+            </h2>
+            <p className="font-retro text-xs text-[var(--muted-foreground)]">
+              Press 1-{currentRoundData.choices.length}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {currentRoundData?.choices.map((choice, index) => (
+              <ChoiceCard
+                key={choice.id}
+                choice={choice}
+                index={index}
+                className={getChoiceCardClassName(choice)}
+                onClick={createChoiceClickHandler(choice)}
+              />
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

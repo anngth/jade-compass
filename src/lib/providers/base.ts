@@ -68,18 +68,22 @@ Requirements:
 8. Include rich descriptions of locations, characters, and items
 9. Each round should meaningfully advance the plot
 10. The ending should be satisfying and consistent with the story flow
-11. initItems is the initial items in the inventory before the choice is made
-12. finalItems is the final items in the inventory after the choice is made
-13. storyProgress is the summary of story events up to this point
-14. location is the current location
-15. status is the current status of the character
-16. isCorrect is the correct choice
-17. consequence is the consequence of the choice
-18. id is the id of the choice
-19. title is the title of the choice
-20. summary is the summary of the choice
-21. isCorrect is the correct choice
-22. consequence is the consequence of the choice
+11. Because a wrong choice immediately ends the game, every round must be fair: include enough clues in sceneSummary and/or intro for a careful player to infer the correct choice
+12. Wrong choices must still feel plausible; do not make them silly, obviously fatal, or obviously inferior
+13. Do not reveal correctness in player-facing choice title or summary; avoid words like safe, correct, fatal, doomed, obvious, best, or trap unless all choices are equally subtle
+14. sceneSummary is a player-facing 1-2 sentence decision prompt, max 180 characters
+15. intro is the richer scene description for players who want more detail
+16. initItems is the initial items in the inventory before the choice is made
+17. finalItems is the final items in the inventory after the choice is made
+18. storyProgress is the summary of story events up to this point
+19. location is the current location
+20. status is the full current status of the character
+21. shortStatus is a HUD-friendly status label, max 48 characters
+22. choice title must be a short player action, max 6 words
+23. choice summary must describe the player's intended action in 1 sentence, not the outcome
+24. consequence is the actual outcome after choosing; explain the logic behind success or failure here
+25. isCorrect is the correct choice
+26. id is the id of the choice
 ` + (plusFormat ? this.createResponseFormat() : "")
     );
   }
@@ -92,53 +96,38 @@ Response Format (JSON only):
   "overall_theme": "Main theme of the story",
   "rounds": [
     {
-      "id": "r1",
-      "title": "Round 1 Title",
-      "description": "Detailed description of the current situation",
+      "round": 1,
+      "location": "Current location",
+      "intro": "Detailed description of the current situation",
+      "sceneSummary": "Player-facing 1-2 sentence scene summary, max 180 characters",
       "narrativeState": {
         "location": "Current location",
-        "status": "Character's current condition",
+        "status": "Character's full current condition",
+        "shortStatus": "HUD-friendly status, max 48 characters",
         "initItems": ["current", "inventory", "items"],
         "storyProgress": "Summary of story events up to this point"
       },
       "choices": [
         {
           "id": "r1_c1",
-          "title": "Choice 1 Title",
-          "summary": "What happens if this option is chosen (1-2 sentences)",
+          "title": "Player action, max 6 words",
+          "summary": "Intended action from the player's perspective; do not reveal outcome",
           "isCorrect": true,
-          "consequence": "How this choice impacts the story",
+          "consequence": "Actual outcome after choosing; explain why this succeeds or fails",
           "finalItems": ["final", "inventory", "items"]
         },
         {
           "id": "r1_c2",
-          "title": "Choice 2 Title",
-          "summary": "What happens if this option is chosen",
+          "title": "Player action, max 6 words",
+          "summary": "Intended action from the player's perspective; do not reveal outcome",
           "isCorrect": false,
-          "consequence": "Why this is not the optimal choice",
+          "consequence": "Actual outcome after choosing; explain why this succeeds or fails",
           "finalItems": ["final", "inventory", "items"]
         }
       ]
     }
   ]
 }`;
-  }
-
-  protected createNextRoundStoryPrompt(
-    totalRounds: number,
-    choicesPerRound: number,
-    plusFormat: boolean = false
-  ): string {
-    return (
-      `Generate a complete ${totalRounds}-round treasure hunting adventure.
-
-    Requirements:
-    1. Create a compelling introduction that sets up the adventure
-    2. Generate ${totalRounds} interconnected rounds forming a complete story arc
-    3. Each round must have exactly ${choicesPerRound} choices
-    4. Only ONE correct choice (isCorrect: true) per round
-    ` + (plusFormat ? this.createResponseFormat() : "")
-    );
   }
 
   // Helper methods for consistent logging

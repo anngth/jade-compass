@@ -1,35 +1,34 @@
-# Agent Instructions
+# Repository Guidelines
 
-Jade Compass is a Next.js 16, React 19, TypeScript adventure-game hub. Relic Expedition is playable; Astral Codex is currently a concept route.
+## Project Structure & Module Organization
 
-## Working Rules
+Jade Compass is a React 19 and TypeScript app using the Next.js App Router API through vinext, deployed to Cloudflare Workers. Routes live in `src/app`, including `/`, `/relic-expedition`, `/astral-codex`, and API routes under `src/app/api`. Shared UI is in `src/components/ui`, libraries in `src/lib`, hooks and contexts in `src/hooks` and `src/contexts`, and Relic Expedition code in `src/games/relic-expedition`. Static assets live in `public`; technical docs live in `docs`.
 
-- Use `pnpm` and follow existing TypeScript, Tailwind, and component patterns.
-- Keep changes scoped. Do not refactor unrelated code.
-- Never log, persist, or send API keys in request bodies.
-- Preserve the retro adventure theme, keyboard access, and responsive behavior.
-- Search the repository before assuming a path or API is current.
-- Update the relevant document when behavior, structure, configuration, or security changes.
+## Build, Test, and Development Commands
 
-## Key Paths
+Use Node.js 22+ and pnpm.
 
-- `src/app/` - routes and API handlers
-- `src/games/relic-expedition/` - game UI, state, schemas, and story flow
-- `src/lib/providers/` - direct and AI SDK LLM adapters
-- `src/lib/session/` - encrypted API-key session
-- `src/contexts/settings-context.tsx` - player settings
-- `src/proxy.ts` - API rate limits and session guard
-- `next.config.ts` - Next.js and security-header configuration
+- `pnpm dev` starts the local vinext development server.
+- `pnpm lint` runs ESLint across the repository.
+- `pnpm type-check` runs `tsc --noEmit`.
+- `pnpm build` creates a production build.
+- `pnpm start` runs the local production server.
+- `pnpm audit` checks dependencies at moderate severity or higher.
 
-## Verification
+## Coding Style & Naming Conventions
 
-Run the checks relevant to the change:
+Use TypeScript strict mode and keep public boundaries explicitly typed. Prefer the `@/` alias for imports from `src`. Follow existing naming: kebab-case filenames such as `new-adventure-card.tsx`, PascalCase React components, and `use-` prefixed hooks. Use Tailwind classes and existing UI primitives before adding custom patterns. ESLint uses Next core-web-vitals and TypeScript rules; avoid `any` unless the context justifies it.
 
-```bash
-pnpm lint
-pnpm type-check
-pnpm build
-pnpm audit
-```
+## Testing Guidelines
+
+See [`docs/development.md#verification`](./docs/development.md#verification). No automated test runner yet — run lint, type-check, build, and audit as relevant; manually verify UI routes and keyboard behavior.
+
+## Commit & Pull Request Guidelines
+
+Git history follows Conventional Commit-style prefixes, for example `fix: harden and migrate API proxy`, `docs: consolidate repository documentation`, and `chore: update package.json`. Keep commits focused and imperative. Pull requests should include a problem/solution summary, verification commands, linked issues when applicable, and screenshots for visible UI changes.
+
+## Security & Configuration Tips
+
+Copy `.env.example` to `.env.local` for local configuration. `SESSION_SECRET` is required in production and should be generated with `openssl rand -base64 32`. Never log API keys or include them in request bodies; use the existing session and API route flow.
 
 Documentation index: [`docs/README.md`](./docs/README.md).

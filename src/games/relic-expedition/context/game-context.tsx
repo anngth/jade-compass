@@ -37,6 +37,7 @@ const defaultGameState: IGameState = {
   narrativeState: {
     location: "Unknown",
     status: "Ready",
+    shortStatus: "Ready",
     initItems: [],
   },
   choiceHistory: [],

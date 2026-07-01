@@ -77,7 +77,10 @@ export class MistralProvider extends BaseLLMProvider {
       const jsonText = parseJSONResponse<object>(
         (response.choices[0].message.content as string) || "",
       );
-      const parsedResponse = validateFullStoryResponse(jsonText);
+      const parsedResponse = validateFullStoryResponse(jsonText, {
+        rounds: totalRounds,
+        choicesPerRound,
+      });
 
       this.logResponse(
         requestId,

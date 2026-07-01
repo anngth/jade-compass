@@ -80,7 +80,10 @@ export class AnthropicProvider extends BaseLLMProvider {
 
       const jsonText = parseJSONResponse<object>(content.text);
 
-      const parsedResponse = validateFullStoryResponse(jsonText);
+      const parsedResponse = validateFullStoryResponse(jsonText, {
+        rounds: totalRounds,
+        choicesPerRound,
+      });
 
       this.logResponse(
         requestId,
