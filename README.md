@@ -11,7 +11,7 @@ A retro pixel-art home for Jade Compass adventure games, built with React and Ty
 
 ## 🚀 Quick Start
 
-**Prerequisites**: Node.js 18+ (recommended: 20+), pnpm
+**Prerequisites**: Node.js 22+ (required by vinext), pnpm
 
 1. **Clone & Install**:
 
