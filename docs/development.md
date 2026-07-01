@@ -2,7 +2,7 @@
 
 ## Setup
 
-Use Node.js 20 and pnpm:
+Use Node.js 22+ (required by vinext) and pnpm:
 
 ```bash
 pnpm install
