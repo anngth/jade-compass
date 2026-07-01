@@ -57,12 +57,12 @@ pnpm dev
 
 Supported providers (direct API and AI SDK variants):
 
-- **OpenAI** — GPT-5.5 and GPT-5.4 models
-- **OpenRouter** — Nex, NVIDIA, Qwen, OpenAI OSS, and DeepSeek free-tier models
-- **Anthropic** — Claude Fable 5, Opus 4.8, Sonnet 4.6, Haiku 4.5
-- **Google** — Gemini 3.5, 3.1, 3, and 2.5 models
-- **Mistral** — Mistral Medium 3.5, Small 4, Large 3, and Ministral 3
-- **Groq** — GPT-OSS and Llama models (via AI SDK)
+- **OpenAI** — GPT-5, GPT-4o models
+- **OpenRouter** — DeepSeek, Qwen, Kimi (free tier)
+- **Anthropic** — Claude Opus 4, Sonnet 4, Haiku 4.5
+- **Google** — Gemini 3.5 Flash, Gemini 2.5 Pro/Flash
+- **Mistral** — Mistral Large, Medium, Small
+- **Groq** — Llama, Qwen (via AI SDK)
 
 See [docs/llm-providers.md](./docs/llm-providers.md) for the full list and architecture.
 
