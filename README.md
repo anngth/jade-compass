@@ -1,13 +1,13 @@
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/nguyenthanhan/jade-compass-relic-expedition?utm_source=oss&utm_medium=github&utm_campaign=nguyenthanhan%2Fjade-compass-relic-expedition&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
-[![Release and Deploy](https://github.com/nguyenthanhan/jade-compass-relic-expedition/workflows/Deploy%20and%20Release/badge.svg)](https://github.com/nguyenthanhan/jade-compass-relic-expedition/actions/workflows/deploy-and-release.yml)
-[![Deploy on Vercel](https://img.shields.io/badge/Deploy%20on-Vercel-black)](https://vercel.com/heimers-projects/jade-compass-relic-expedition)
+[![Release](https://github.com/nguyenthanhan/jade-compass-relic-expedition/workflows/Release/badge.svg)](https://github.com/nguyenthanhan/jade-compass-relic-expedition/actions/workflows/release.yml)
+[![Deploy on Cloudflare Workers](https://img.shields.io/badge/Deploy%20on-Cloudflare%20Workers-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/workers/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 
 # Jade Compass
 
-A retro pixel-art home for Jade Compass adventure games, built with Next.js, React, and TypeScript. It currently links to the playable **Relic Expedition** and the early concept page for **Astral Codex**.
+A retro pixel-art home for Jade Compass adventure games, built with React and TypeScript on the Next.js App Router API, running on [vinext](https://github.com/cloudflare/vinext) (Vite) and deployed to Cloudflare Workers. It currently links to the playable **Relic Expedition** and the early concept page for **Astral Codex**.
 
 ## 🚀 Quick Start
 
@@ -57,12 +57,12 @@ pnpm dev
 
 Supported providers (direct API and AI SDK variants):
 
-- **OpenAI** — GPT-5, GPT-4o models
-- **OpenRouter** — DeepSeek, Qwen, Kimi (free tier)
-- **Anthropic** — Claude Opus 4, Sonnet 4, Haiku 4.5
-- **Google** — Gemini 3.5 Flash, Gemini 2.5 Pro/Flash
-- **Mistral** — Mistral Large, Medium, Small
-- **Groq** — Llama, Qwen (via AI SDK)
+- **OpenAI** — GPT-5.5 and GPT-5.4 models
+- **OpenRouter** — Nex, NVIDIA, Qwen, OpenAI OSS, and DeepSeek free-tier models
+- **Anthropic** — Claude Fable 5, Opus 4.8, Sonnet 4.6, Haiku 4.5
+- **Google** — Gemini 3.5, 3.1, 3, and 2.5 models
+- **Mistral** — Mistral Medium 3.5, Small 4, Large 3, and Ministral 3
+- **Groq** — GPT-OSS and Llama models (via AI SDK)
 
 See [docs/llm-providers.md](./docs/llm-providers.md) for the full list and architecture.
 
@@ -72,7 +72,7 @@ See [docs/llm-providers.md](./docs/llm-providers.md) for the full list and archi
 - Choice-based progression with multiple endings
 - Full keyboard navigation and ARIA labels
 - Content generation in English or Vietnamese
-- Responsive design, Next.js 16 + React 19
+- Responsive design, React 19 on the Next.js App Router API via vinext, deployed to Cloudflare Workers
 
 ## 📝 Scripts
 
@@ -80,8 +80,9 @@ See [docs/llm-providers.md](./docs/llm-providers.md) for the full list and archi
 |----------|----------|
 | Development | `pnpm dev`, `pnpm build`, `pnpm start` |
 | Quality | `pnpm lint`, `pnpm type-check`, `pnpm audit` |
-| Analysis | `pnpm analyze` |
 | Release | `pnpm release`, `pnpm release:patch/minor/major`, `pnpm changelog` |
+
+Cloudflare Workers builds and deploys automatically via its Git integration (push to `main` = production, pull requests = preview) — no manual deploy command needed.
 
 ## 🔒 Security
 
