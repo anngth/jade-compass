@@ -1,37 +1,37 @@
 # LLM Providers
 
-## Structure
+## Layout
 
-`src/lib/providers/` contains:
+`src/lib/providers/`:
 
-- `base.ts` - provider contract and shared prompt behavior
-- `provider-factory.ts` - selects an adapter
-- `provider-data.ts` - provider metadata and model options
-- `openai.ts`, `anthropic.ts`, `google.ts`, `mistral.ts` - direct API adapters
-- `vercel.ts` - OpenAI, Anthropic, Google, Groq, Mistral, and OpenRouter through AI SDK
+| File | Role |
+| --- | --- |
+| `base.ts` | Contract and shared prompts |
+| `provider-factory.ts` | Adapter selection |
+| `provider-data.ts` | Metadata, models, model resolution |
+| `openai.ts`, `anthropic.ts`, `google.ts`, `mistral.ts` | Direct API adapters |
+| `vercel.ts` | AI SDK adapters (OpenAI, Anthropic, Google, Groq, Mistral, OpenRouter) |
 
-Direct OpenRouter uses the OpenAI-compatible adapter. The authoritative provider IDs and model lists are in `provider-data.ts` and `src/types/llm.ts`.
+OpenRouter (direct) uses the OpenAI-compatible adapter. Model lists and provider IDs: `provider-data.ts`, `src/types/llm.ts`.
 
-## Request Path
+Retired model IDs in saved settings are normalized on load via `resolveSavedProviderModel()`. API calls use `resolveProviderModel()` (including custom models).
+
+## Request path
 
 ```text
-UI
-→ src/lib/api/llm-session.ts
-→ /api/generate-story or /api/test-connection
-→ src/lib/api/validate-llm-request.ts
-→ provider-factory.ts
-→ provider adapter
+UI → llm-session.ts → /api/generate-story | /api/test-connection
+    → validate-llm-request.ts → provider-factory → adapter
 ```
 
-The client removes API keys from request bodies. The server reads them from the encrypted session and validates provider, model, and game configuration.
+Keys stay out of request bodies; the server reads them from the encrypted session.
 
-## Adding a Provider
+## Adding a provider
 
-1. Implement the provider contract in `src/lib/providers/`.
-2. Add its ID and types in `src/types/llm.ts`.
-3. Add metadata and models in `provider-data.ts`.
-4. Register it in `provider-factory.ts`.
-5. Add setup UI support if required.
-6. Test connection, successful generation, invalid output, and provider errors with mocked network responses.
+1. Implement adapter in `src/lib/providers/`.
+2. Add ID/types in `src/types/llm.ts`.
+3. Add metadata in `provider-data.ts`.
+4. Register in `provider-factory.ts`.
+5. Wire setup UI if needed.
+6. Verify connection, generation, invalid output, and errors (mocked network).
 
-Keep adapters interchangeable, validate structured output, and return actionable errors without exposing credentials.
+Keep adapters interchangeable. Validate structured output via `validateFullStoryResponse()`.

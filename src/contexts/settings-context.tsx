@@ -25,6 +25,7 @@ import {
   saveApiKeys,
 } from "@/lib/api-key-storage";
 import { loadProviderData } from "@/hooks/use-provider-data";
+import { resolveSavedProviderModel } from "@/lib/providers/provider-data";
 import { debounce } from "@/utils/debounce";
 import { toast } from "sonner";
 
@@ -129,6 +130,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           const defaults =
             providerData?.[provider as keyof typeof providerData];
 
+          const savedModel = resolveSavedProviderModel(provider, {
+            model: parsed.providerConfig?.model,
+            customModel: parsed.providerConfig?.customModel,
+          });
+
           const loadedSettings: ISettings = {
             gameConfig: {
               rounds: parsed.gameConfig?.rounds || 2,
@@ -138,13 +144,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             providerConfig: {
               provider,
               apiBase: defaults?.apiBase,
-              model: parsed.providerConfig?.model || defaults?.defaultModel,
-              customModel: parsed.providerConfig?.customModel || "",
+              model: savedModel.model,
+              customModel: savedModel.customModel || "",
               apiKeyManager,
             },
           };
 
           setSettings(loadedSettings);
+          localStorage.setItem(
+            "jadeCompassSettings",
+            serializeSettingsForStorage(loadedSettings),
+          );
 
           const activeKey =
             apiKeyManager[provider as keyof typeof apiKeyManager];

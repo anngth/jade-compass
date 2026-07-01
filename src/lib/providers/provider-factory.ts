@@ -1,15 +1,15 @@
 import { LLMProvider, IProviderConfig } from "@/types/llm";
-import { providerData } from "@/lib/providers/provider-data";
+import {
+  providerData,
+  resolveProviderModel,
+} from "@/lib/providers/provider-data";
 
 export class ProviderFactory {
   static async create(config: IProviderConfig): Promise<LLMProvider> {
     const provider = config.provider ?? "openai";
     const apiKey = config.apiKeyManager?.[provider];
     const providerInfo = providerData[provider];
-    const effectiveModel =
-      config.model === "__custom__" && config.customModel
-        ? config.customModel
-        : (config.model ?? providerInfo?.defaultModel);
+    const effectiveModel = resolveProviderModel(provider, config);
 
     switch (provider) {
       case "openai": {

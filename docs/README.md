@@ -1,15 +1,12 @@
 # Documentation
 
-Each topic has one primary document:
+One document per topic. Update the relevant file when behavior changes.
 
-| Document | Scope |
-|---|---|
-| [Architecture](./architecture.md) | Runtime structure, routes, proxy, security headers |
-| [Development](./development.md) | Setup, commands, CI, contribution rules |
-| [Game Logic](./game-logic.md) | Relic Expedition states and story flow |
-| [LLM Providers](./llm-providers.md) | Provider architecture and extension steps |
-| [State and Security](./state-management.md) | Settings, API keys, sessions, rate limits |
-| [UI/UX](./ui-ux.md) | Themes, components, interaction requirements |
-| [Testing](./testing.md) | Current coverage and test priorities |
-
-Keep documentation focused on stable behavior and maintain it in the same change as the code it describes.
+| Document | Contents |
+| --- | --- |
+| [Architecture](./architecture.md) | Project layout, API routes, proxy, headers |
+| [Development](./development.md) | Setup, commands, CI, deploy, verification |
+| [Game logic](./game-logic.md) | Relic Expedition flow and story schema |
+| [LLM providers](./llm-providers.md) | Provider adapters and extension steps |
+| [State & security](./state-management.md) | Settings, API keys, session, rate limits |
+| [UI/UX](./ui-ux.md) | Themes, components, accessibility |

@@ -133,7 +133,10 @@ export class VercelAIProvider extends BaseLLMProvider {
       const responseTime = Date.now() - startTime;
 
       const jsonText = parseJSONResponse<object>(response.text);
-      const parsedResponse = validateFullStoryResponse(jsonText);
+      const parsedResponse = validateFullStoryResponse(jsonText, {
+        rounds: totalRounds,
+        choicesPerRound,
+      });
 
       this.logResponse(
         requestId,
@@ -208,7 +211,10 @@ export class VercelAIProvider extends BaseLLMProvider {
       const responseTime = Date.now() - startTime;
 
       // parse for logs, not need to return
-      const parsedResponse = validateFullStoryResponse(response.object);
+      const parsedResponse = validateFullStoryResponse(response.object, {
+        rounds: totalRounds,
+        choicesPerRound,
+      });
 
       this.logResponse(
         requestId,

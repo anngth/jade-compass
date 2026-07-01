@@ -4,6 +4,11 @@ import {
   IChoice,
   INarrativeState,
 } from "@/games/relic-expedition/types";
+import {
+  compactText,
+  SCENE_SUMMARY_MAX_LENGTH,
+  SHORT_STATUS_MAX_LENGTH,
+} from "@/games/relic-expedition/lib/story-limits";
 
 function readPath(obj: unknown, ...keys: string[]): unknown {
   if (!obj || typeof obj !== "object") return undefined;
@@ -46,10 +51,18 @@ export function parseToFullStoryResponse(
 
 function parseGameRound(round: unknown, index: number): IGameRound {
   const intro = readString(round, "intro") || readString(round, "description");
+  const rawSceneSummary =
+    readString(round, "sceneSummary") || readString(round, "scene_summary");
+  const sceneSummary = compactText(rawSceneSummary || intro, SCENE_SUMMARY_MAX_LENGTH);
   const roundNumber =
     readPath(round, "round") ?? readPath(round, "id") ?? index + 1;
-  const location = readString(round, "location");
-  const narrativeState = parseNarrativeState(round);
+  const topLevelLocation = readString(round, "location");
+  const narrativeState = parseNarrativeState(round, topLevelLocation);
+  const location = narrativeState.location || topLevelLocation;
+  const syncedNarrativeState: INarrativeState = {
+    ...narrativeState,
+    location,
+  };
   const choicesRaw = readPath(round, "choices");
   const choices = Array.isArray(choicesRaw)
     ? choicesRaw.map((choice: unknown) => parseChoice(choice))
@@ -59,9 +72,10 @@ function parseGameRound(round: unknown, index: number): IGameRound {
 
   return {
     intro,
+    sceneSummary,
     round: normalizeRoundNumber(roundNumber, index),
     location,
-    narrativeState,
+    narrativeState: syncedNarrativeState,
     choices,
     failureSummary: failureSummary || undefined,
   };
@@ -82,13 +96,23 @@ function normalizeRoundNumber(roundNumber: unknown, index: number): number {
   return index + 1;
 }
 
-function parseNarrativeState(round: unknown): INarrativeState {
+function parseNarrativeState(
+  round: unknown,
+  fallbackLocation = "",
+): INarrativeState {
   const narrativeState =
     readPath(round, "narrativeState") ??
     readPath(round, "narrative_state") ??
     {};
-  const location = readString(narrativeState, "location");
+  const location =
+    readString(narrativeState, "location") || fallbackLocation;
   const status = readString(narrativeState, "status");
+  const shortStatus = compactText(
+    readString(narrativeState, "shortStatus") ||
+      readString(narrativeState, "short_status") ||
+      status,
+    SHORT_STATUS_MAX_LENGTH,
+  );
   const initItems =
     readPath(narrativeState, "initItems") ??
     readPath(narrativeState, "items") ??
@@ -100,6 +124,7 @@ function parseNarrativeState(round: unknown): INarrativeState {
   return {
     location,
     status,
+    shortStatus,
     initItems: Array.isArray(initItems)
       ? initItems.filter((item): item is string => typeof item === "string")
       : [],

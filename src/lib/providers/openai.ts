@@ -81,7 +81,10 @@ export class OpenAIProvider extends BaseLLMProvider {
       const responseTime = Date.now() - startTime;
 
       const jsonText = parseJSONResponse<object>(content);
-      const parsedResponse = validateFullStoryResponse(jsonText);
+      const parsedResponse = validateFullStoryResponse(jsonText, {
+        rounds: totalRounds,
+        choicesPerRound,
+      });
 
       this.logResponse(
         requestId,

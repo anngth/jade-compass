@@ -3,6 +3,7 @@ import type { ContentLanguageType } from "@/types/llm";
 export interface INarrativeState {
   location: string;
   status: string;
+  shortStatus: string;
   initItems: string[];
   storyProgress?: string;
 }
@@ -18,6 +19,7 @@ export interface IChoice {
 
 export interface IGameRound {
   intro: string;
+  sceneSummary: string;
   round: number;
   location: string;
   narrativeState: INarrativeState;

@@ -5,20 +5,30 @@
 `IGameState.status` selects the screen in `src/app/relic-expedition/page.tsx`:
 
 | Status | Screen |
-|---|---|
-| `idle` | Setup/home |
+| --- | --- |
+| `idle` | Setup |
 | `playing` | Current round and choices |
-| `victory` | Completed all rounds |
-| `failure` | Selected an incorrect choice |
+| `victory` | All rounds completed |
+| `failure` | Incorrect choice |
 
 ## Flow
 
-1. The player selects rounds, choices per round, language, provider, and model.
-2. `startGame()` creates a seed and requests one complete story from `/api/generate-story`.
-3. The server validates the request, calls the provider, and validates the full response with Zod.
-4. The client stores all rounds and advances locally; gameplay makes no additional LLM calls.
-5. An incorrect choice ends the game. Completing every round wins.
+1. Player configures rounds (2–10), choices per round (2–5), language, provider, and model.
+2. `startGame()` requests one complete story from `/api/generate-story`.
+3. Server validates the response (Zod + round/choice counts).
+4. Client stores all rounds and advances locally — no further LLM calls during play.
+5. Wrong choice ends the run; surviving all rounds wins.
 
-Configuration limits are 2-10 rounds and 2-5 choices per round. Supported content languages are English and Vietnamese.
+## Story shape
 
-Players can use mouse, Tab/Enter, or number keys 1-5.
+Each round has:
+
+- **`sceneSummary`** — compact decision prompt (max 180 chars), shown by default
+- **`intro`** — richer scene detail, expandable in UI
+- **`narrativeState.shortStatus`** — HUD status (max 48 chars); **`status`** is the full condition for summaries
+
+The parser compacts overlong values and syncs top-level `location` with `narrativeState.location`.
+
+Rounds must be fair deduction puzzles: clues in `sceneSummary` and/or `intro`, plausible wrong choices. Choice `title`/`summary` describe intended action only; outcomes go in `consequence`.
+
+Languages: English, Vietnamese. Controls: mouse, number keys 1–5, Tab/Enter.
