@@ -1,3 +1,9 @@
+[![Release](https://github.com/anngth/jade-compass/workflows/Release/badge.svg)](https://github.com/anngth/jade-compass/actions/workflows/release.yml)
+[![Deploy on Cloudflare Workers](https://img.shields.io/badge/Deploy%20on-Cloudflare%20Workers-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/workers/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+
 # Jade Compass
 
 Retro pixel-art hub for Jade Compass adventure games. **Relic Expedition** is playable; **Astral Codex** is a concept route.
@@ -22,22 +28,22 @@ For production, set `SESSION_SECRET` in `.env.local` or as a Worker secret (`ope
 
 ## Routes
 
-| Path | Description |
-| --- | --- |
-| `/` | Home |
-| `/relic-expedition` | Treasure-hunting adventure |
-| `/astral-codex` | Planned second game (concept) |
+| Path                | Description                   |
+| ------------------- | ----------------------------- |
+| `/`                 | Home                          |
+| `/relic-expedition` | Treasure-hunting adventure    |
+| `/astral-codex`     | Planned second game (concept) |
 
 ## Scripts
 
-| Command | Purpose |
-| --- | --- |
-| `pnpm dev` | Development server |
-| `pnpm build` | Production build |
-| `pnpm start` | Local production server |
-| `pnpm lint` | ESLint |
-| `pnpm type-check` | TypeScript check |
-| `pnpm audit` | Dependency audit |
+| Command           | Purpose                 |
+| ----------------- | ----------------------- |
+| `pnpm dev`        | Development server      |
+| `pnpm build`      | Production build        |
+| `pnpm start`      | Local production server |
+| `pnpm lint`       | ESLint                  |
+| `pnpm type-check` | TypeScript check        |
+| `pnpm audit`      | Dependency audit        |
 
 ## Documentation
 
