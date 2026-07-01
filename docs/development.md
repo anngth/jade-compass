@@ -16,16 +16,24 @@ pnpm dev
 
 | Command | Purpose |
 |---|---|
-| `pnpm dev` | Development server |
+| `pnpm dev` | Development server (`vinext dev`) |
 | `pnpm lint` | ESLint |
 | `pnpm type-check` | TypeScript validation |
-| `pnpm build` | Production build |
+| `pnpm build` | Production build (`vinext build`) |
+| `pnpm start` | Local production server (`vinext start`) |
 | `pnpm audit` | Dependency security audit |
-| `pnpm analyze` | Bundle analysis |
 | `pnpm release[:patch\|:minor\|:major]` | Release workflow |
 | `pnpm changelog` | Generate changelog content |
 
-CI installs with the frozen lockfile, then runs type-check, audit, and build. Run lint locally because CI does not currently include it.
+CI (`ci.yml`) installs with the frozen lockfile, then runs type-check, audit, and build. Run lint locally because CI does not currently include it.
+
+## Deployment
+
+Cloudflare Workers builds and deploys via its native Git integration (Workers Builds), not GitHub Actions: pushes to `main` deploy to production, pull requests get a preview deployment. Configure and inspect this in the Cloudflare dashboard for the `jade-compass` Worker.
+
+`SESSION_SECRET` must be set on the Worker with `wrangler secret put SESSION_SECRET` — it is not managed by Git integration or CI.
+
+`release.yml` (GitHub Actions) only creates a GitHub Release with changelog content when a `v*` tag is pushed; it does not deploy anything.
 
 ## Conventions
 

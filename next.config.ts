@@ -1,11 +1,4 @@
-import type { NextConfig } from "next";
-import bundleAnalyzer from "@next/bundle-analyzer";
-
 const isProd = process.env.NODE_ENV === "production";
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -20,7 +13,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
 ].join("; ");
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   allowedDevOrigins: ["192.168.1.27"],
 
   compiler: {
@@ -53,4 +46,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default nextConfig;

@@ -13,9 +13,9 @@
 # testing
 /coverage
 
-# next.js
+# vinext / next-compat generated types
 /.next/
-/out/
+next-env.d.ts
 
 # production
 /build
@@ -39,4 +39,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+
+/dist/
+.vinext/
+.wrangler/

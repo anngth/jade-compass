@@ -1,6 +1,6 @@
 # Architecture
 
-Jade Compass uses Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4, Zod, and pnpm. It deploys to Vercel.
+Jade Compass uses the Next.js 16 App Router API, React 19, TypeScript, Tailwind CSS 4, Zod, and pnpm. It runs on [vinext](https://github.com/cloudflare/vinext) (a Vite-based Next.js reimplementation) and deploys to Cloudflare Workers, configured via `wrangler.jsonc`. Cloudflare's Git integration (Workers Builds) builds and deploys automatically on push; see [Development](./development.md#deployment).
 
 ## Runtime Structure
 
@@ -28,7 +28,7 @@ src/
 
 ## API
 
-All API routes use the Edge Runtime.
+Routes run in the Cloudflare Workers runtime (`nodejs_compat` enabled in `wrangler.jsonc`). `src/proxy.ts` runs as Next.js 16 Proxy (Node.js runtime by default). vinext ignores the per-route `runtime` segment config, so any `export const runtime = "edge"` left in route files has no effect under this deployment.
 
 | Route | Methods | Purpose |
 |---|---|---|
