@@ -7,6 +7,8 @@ One document per topic. Update the relevant file when behavior changes.
 | [Architecture](./architecture.md) | Project layout, API routes, proxy, headers |
 | [Development](./development.md) | Setup, commands, CI, deploy, verification |
 | [Game logic](./game-logic.md) | Relic Expedition flow and story schema |
+| [Relic Expedition plan](./relic-expedition-plan.md) | Implementation steps for starting, resuming and replaying expeditions |
+| [Relic Expedition spec](./relic-expedition-spec.md) | Acceptance criteria for the sample, saved games, victory and keyboard controls |
 | [LLM providers](./llm-providers.md) | Provider adapters and extension steps |
 | [State & security](./state-management.md) | Settings, API keys, session, rate limits |
 | [UI/UX](./ui-ux.md) | Themes, components, accessibility |

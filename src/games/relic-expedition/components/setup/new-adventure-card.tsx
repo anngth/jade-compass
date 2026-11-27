@@ -19,13 +19,17 @@ import {
 
 interface NewAdventureCardProps {
   onStartGame: () => void;
+  onStartSample: () => void;
   canStart: boolean;
+  isLoading: boolean;
   startButtonText: string;
 }
 
 export function NewAdventureCard({
   onStartGame,
+  onStartSample,
   canStart,
+  isLoading,
   startButtonText,
 }: NewAdventureCardProps) {
   const { settings, updateSettings } = useSettings();
@@ -134,6 +138,14 @@ export function NewAdventureCard({
           >
             {startButtonText}
           </Button>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[var(--border)] pt-4">
+          <Button type="button" variant="outline" onClick={onStartSample} disabled={isLoading}>
+            Play Sample
+          </Button>
+          <p className="font-retro text-sm text-[var(--muted-foreground)]">
+            Two rounds in your selected language. No API key needed.
+          </p>
         </div>
       </CardContent>
     </Card>

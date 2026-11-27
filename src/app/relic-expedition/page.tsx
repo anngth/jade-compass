@@ -1,8 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { GameProvider } from "@/games/relic-expedition/context/game-context";
-import { useGame } from "@/games/relic-expedition/context/game-context";
+import { GameProvider, useGame } from "@/games/relic-expedition/context/game-context";
 
 const HomePage = dynamic(() =>
   import("@/games/relic-expedition/components/screens/home").then((mod) => ({
@@ -26,7 +25,15 @@ const FailurePage = dynamic(() =>
 );
 
 function GameRouter() {
-  const { gameState } = useGame();
+  const { gameState, isRestoring } = useGame();
+
+  if (isRestoring) {
+    return (
+      <div role="status" className="grid min-h-screen place-items-center font-pixel text-[var(--primary)]">
+        Loading adventure…
+      </div>
+    );
+  }
 
   switch (gameState.status) {
     case "idle":

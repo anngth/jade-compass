@@ -2,14 +2,13 @@
 
 import React from "react";
 import { useGame } from "@/games/relic-expedition/context/game-context";
-import { useSettings } from "@/contexts/settings-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Sparkles } from "lucide-react";
 
 export function VictoryPage() {
-  const { gameState, resetGame } = useGame();
-  const { settings } = useSettings();
+  const { gameState, totalRounds, resetGame } = useGame();
+  const finalChoice = gameState.choiceHistory.at(-1);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -32,7 +31,7 @@ export function VictoryPage() {
           </h2>
 
           <p className="font-pixel text-xl text-[var(--accent)]">
-            Congratulations! You have found the pot.
+            You recovered the Jade Compass.
           </p>
         </div>
 
@@ -47,7 +46,7 @@ export function VictoryPage() {
                   Rounds Completed:{" "}
                 </span>
                 <span className="text-[var(--primary)]">
-                  {settings.gameConfig?.rounds || 2}
+                  {totalRounds}
                 </span>
               </p>
               <p>
@@ -84,37 +83,29 @@ export function VictoryPage() {
                   {gameState.choiceHistory.length}
                 </span>
               </p>
-              {gameState.narrativeState.initItems.length > 0 && (
-                <p>
-                  <span className="text-[var(--muted-foreground)]">
-                    Items Collected:{" "}
-                  </span>
-                  <span className="text-[var(--accent)]">
-                    {gameState.narrativeState.initItems.join(", ")}
-                  </span>
-                </p>
-              )}
+              <p>
+                <span className="text-[var(--muted-foreground)]">
+                  Final Inventory:{" "}
+                </span>
+                <span className="text-[var(--accent)]">
+                  {finalChoice?.finalItems.length
+                    ? finalChoice.finalItems.join(", ")
+                    : "None"}
+                </span>
+              </p>
             </div>
 
-            {gameState.choiceHistory.length > 0 && (
+            {finalChoice && (
               <div className="border-t border-[var(--border)] pt-4">
                 <h4 className="font-pixel text-sm text-[var(--primary)] mb-2">
                   Victory Choice
                 </h4>
                 <div className="p-3 bg-[var(--accent)]/10 rounded">
                   <p className="font-retro text-sm font-semibold text-[var(--primary)]">
-                    {
-                      gameState.choiceHistory[
-                        gameState.choiceHistory.length - 1
-                      ]?.title
-                    }
+                    {finalChoice.title}
                   </p>
-                  <p className="font-retro text-xs text-[var(--muted-foreground)] mt-1">
-                    {
-                      gameState.choiceHistory[
-                        gameState.choiceHistory.length - 1
-                      ]?.summary
-                    }
+                  <p className="font-retro text-sm text-[var(--muted-foreground)] mt-1">
+                    {finalChoice.consequence}
                   </p>
                 </div>
               </div>
@@ -123,7 +114,7 @@ export function VictoryPage() {
         </Card>
 
         <Button className="w-full text-lg pulse" onClick={resetGame}>
-          PLAY AGAIN
+          New Adventure
         </Button>
       </div>
     </div>

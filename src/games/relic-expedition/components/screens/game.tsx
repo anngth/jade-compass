@@ -2,8 +2,7 @@
 
 import React, { memo, useEffect, useState, useCallback } from "react";
 import { useGame } from "@/games/relic-expedition/context/game-context";
-import { useSettings } from "@/contexts/settings-context";
-import { IChoice } from "@/games/relic-expedition/types";
+import type { IChoice } from "@/games/relic-expedition/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChevronDown,
@@ -18,7 +17,6 @@ import {
 interface ChoiceCardProps {
   choice: IChoice;
   index: number;
-  className: string;
   onClick: () => void;
 }
 
@@ -59,23 +57,25 @@ const HudChip = memo(function HudChip({
 const ChoiceCard = memo(function ChoiceCard({
   choice,
   index,
-  className,
   onClick,
 }: ChoiceCardProps) {
   const choiceLabel = `Choice ${index + 1}: ${choice.title}. ${choice.summary}`;
 
   return (
     <Card
-      key={choice.id}
-      className={className}
+      className="cursor-pointer transition-all hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]"
       onClick={onClick}
       role="button"
       tabIndex={0}
       aria-label={choiceLabel}
       onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
+        if (
+          (event.key === "Enter" || event.key === " ") &&
+          !hasModifier(event) &&
+          !event.nativeEvent.isComposing
+        ) {
           event.preventDefault();
-          onClick();
+          if (!event.repeat) onClick();
         }
       }}
     >
@@ -96,12 +96,15 @@ const ChoiceCard = memo(function ChoiceCard({
   );
 });
 
-export function GamePage() {
-  const { gameState, makeChoice, currentRoundData, isLoading } = useGame();
-  const { settings } = useSettings();
+function hasModifier(
+  event: Pick<KeyboardEvent, "altKey" | "ctrlKey" | "metaKey" | "shiftKey">,
+): boolean {
+  return event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
+}
 
-  const [selectedChoice, setSelectedChoice] = useState<IChoice | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+export function GamePage() {
+  const { gameState, makeChoice, currentRoundData, totalRounds } = useGame();
+
   const [lastResultRoundOpen, setLastResultRoundOpen] = useState<number | null>(
     null,
   );
@@ -109,77 +112,37 @@ export function GamePage() {
     number | null
   >(null);
 
-  const handleChoice = useCallback(
-    async (choice: IChoice) => {
-      if (isProcessing) return;
-
-      setSelectedChoice(choice);
-      setIsProcessing(true);
-
-      try {
-        await makeChoice(choice);
-      } catch (error) {
-        console.error("Error making choice:", error);
-        throw error;
-      } finally {
-        setIsProcessing(false);
-        setSelectedChoice(null);
-      }
-    },
-    [isProcessing, makeChoice],
-  );
-
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!currentRoundData || isProcessing) return;
-
-      // Early return if user is typing in an input field
-      const target = e.target as HTMLElement;
+    (event: KeyboardEvent) => {
       if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.contentEditable === "true"
+        !currentRoundData ||
+        event.defaultPrevented ||
+        event.repeat ||
+        event.isComposing ||
+        hasModifier(event)
       ) {
         return;
       }
 
-      // Check for digit keys using e.code
-      let digit: number | null = null;
-      if (e.code.startsWith("Digit")) {
-        digit = parseInt(e.code.replace("Digit", ""));
-      } else if (e.code.startsWith("Numpad")) {
-        digit = parseInt(e.code.replace("Numpad", ""));
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        (target.closest("input, textarea, select, [role='textbox']") ||
+          target.closest<HTMLElement>("[contenteditable]")?.isContentEditable)
+      ) {
+        return;
       }
 
-      if (digit && digit >= 1 && digit <= currentRoundData.choices.length) {
-        const choice = currentRoundData.choices[digit - 1];
-        handleChoice(choice);
-      }
-    },
-    [currentRoundData, isProcessing, handleChoice],
-  );
+      const numberKey = /^(?:Digit|Numpad)([1-9])$/.exec(event.code);
+      if (!numberKey) return;
 
-  // Memoize choice card class names
-  const getChoiceCardClassName = useCallback(
-    (choice: IChoice) => {
-      const baseClasses =
-        "cursor-pointer transition-all hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]";
-      const selectedClasses =
-        selectedChoice?.id === choice.id ? "ring-4 ring-[var(--primary)]" : "";
-      const processingClasses =
-        isProcessing && selectedChoice?.id !== choice.id ? "opacity-50" : "";
+      const index = Number(numberKey[1]) - 1;
+      if (!currentRoundData.choices[index]) return;
 
-      return `${baseClasses} ${selectedClasses} ${processingClasses}`.trim();
+      event.preventDefault();
+      makeChoice(index);
     },
-    [selectedChoice?.id, isProcessing],
-  );
-
-  // Memoize choice click handler
-  const createChoiceClickHandler = useCallback(
-    (choice: IChoice) => {
-      return () => handleChoice(choice);
-    },
-    [handleChoice],
+    [currentRoundData, makeChoice],
   );
 
   useEffect(() => {
@@ -187,7 +150,7 @@ export function GamePage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  if (isLoading || !currentRoundData) {
+  if (!currentRoundData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -198,24 +161,10 @@ export function GamePage() {
     );
   }
 
-  const items =
-    currentRoundData.narrativeState.initItems ??
-    gameState.narrativeState.initItems ??
-    [];
-  const itemsDisplay = items.length ? items.join(", ") : "None";
-  const currentLocation =
-    currentRoundData.narrativeState.location ||
-    gameState.narrativeState.location;
-  const currentStatus =
-    currentRoundData.narrativeState.shortStatus ||
-    gameState.narrativeState.shortStatus ||
-    currentRoundData.narrativeState.status ||
-    gameState.narrativeState.status;
-  const currentProgress =
-    currentRoundData.narrativeState.storyProgress ||
-    gameState.narrativeState.storyProgress;
-  const lastChoice =
-    gameState.choiceHistory[gameState.choiceHistory.length - 1];
+  const { initItems, location, shortStatus, status, storyProgress } =
+    currentRoundData.narrativeState;
+  const itemsDisplay = initItems.length ? initItems.join(", ") : "None";
+  const lastChoice = gameState.choiceHistory.at(-1);
   const sceneSummary = currentRoundData.sceneSummary || currentRoundData.intro;
   const hasSceneDetails =
     currentRoundData.intro && currentRoundData.intro !== sceneSummary;
@@ -245,18 +194,18 @@ export function GamePage() {
               Round
             </p>
             <p className="font-pixel text-lg text-[var(--primary)]">
-              {gameState.currentRound}/{settings?.gameConfig?.rounds}
+              {gameState.currentRound}/{totalRounds}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <HudChip icon={MapPin} label="Location" value={currentLocation} />
-          <HudChip icon={Sparkles} label="Status" value={currentStatus} />
+          <HudChip icon={MapPin} label="Location" value={location} />
+          <HudChip icon={Sparkles} label="Status" value={shortStatus || status} />
           <HudChip icon={Package} label="Items" value={itemsDisplay} />
         </div>
-        {currentProgress && (
-          <HudChip icon={Route} label="Progress" value={currentProgress} />
+        {storyProgress && (
+          <HudChip icon={Route} label="Progress" value={storyProgress} />
         )}
 
         <Card>
@@ -375,13 +324,12 @@ export function GamePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {currentRoundData?.choices.map((choice, index) => (
+            {currentRoundData.choices.map((choice, index) => (
               <ChoiceCard
-                key={choice.id}
+                key={`${gameState.currentRound}-${index}`}
                 choice={choice}
                 index={index}
-                className={getChoiceCardClassName(choice)}
-                onClick={createChoiceClickHandler(choice)}
+                onClick={() => makeChoice(index)}
               />
             ))}
           </div>

@@ -1,33 +1,43 @@
 "use client";
 
-import React, {
+import {
   createContext,
   useContext,
   useState,
   useCallback,
-  ReactNode,
   useEffect,
   useMemo,
+  useRef,
+  type ReactNode,
 } from "react";
 import { logger } from "@/lib/logger";
-import {
+import type {
+  IFullStoryResponse,
   IGameState,
-  IChoice,
   IGameRound,
 } from "@/games/relic-expedition/types";
 import { generateStory } from "@/games/relic-expedition/lib/api/generate-story";
+import { FullStoryResponseSchema } from "@/games/relic-expedition/lib/schemas/full-story";
+import {
+  readExpedition,
+  writeExpedition,
+  type Expedition,
+} from "@/games/relic-expedition/lib/saved-expedition";
+import { sampleStories } from "@/games/relic-expedition/lib/sample-stories";
 import { createStorySeed } from "@/games/relic-expedition/lib/story-seed";
 import { useSettings } from "@/contexts/settings-context";
 import { toast } from "sonner";
 
 interface GameContextType {
   gameState: IGameState;
-  allRounds: IGameRound[] | null;
+  totalRounds: number;
   currentRoundData: IGameRound | null;
+  isRestoring: boolean;
   isLoading: boolean;
-  loadingMessage?: string;
   startGame: () => Promise<void>;
-  makeChoice: (choice: IChoice) => Promise<void>;
+  startSample: () => void;
+  makeChoice: (choiceIndex: number) => void;
+  replayGame: () => void;
   resetGame: () => void;
 }
 
@@ -46,156 +56,169 @@ const defaultGameState: IGameState = {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const { settings } = useSettings();
-  const [gameState, setGameState] = useState<IGameState>(defaultGameState);
-  const [allRounds, setAllRounds] = useState<IGameRound[] | null>(null);
-  const [currentRoundData, setCurrentRoundData] = useState<IGameRound | null>(
-    null
+  const { settings, apiKey } = useSettings();
+  const [expedition, setExpedition] = useState<Expedition | null | undefined>(
+    undefined,
   );
+  const latestExpedition = useRef<typeof expedition>(undefined);
+  const pendingGeneration = useRef<symbol | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState<string | undefined>(
-    undefined
-  );
-
-  const startGame = useCallback(async () => {
-    try {
-      const { providerConfig, gameConfig } = settings;
-      if (!providerConfig) {
-        throw new Error("Provider configuration is required");
-      }
-      setIsLoading(true);
-      setLoadingMessage("Generating your adventure…");
-
-      const rounds = gameConfig?.rounds || 2;
-      const choicesPerRound = gameConfig?.choicesPerRound || 2;
-
-      const storyData = await generateStory(
-        providerConfig,
-        {
-          rounds,
-          choicesPerRound,
-          contentLanguage: gameConfig?.contentLanguage || "English",
-        },
-        createStorySeed()
-      );
-
-      if (!storyData?.rounds?.length) {
-        throw new Error("Failed to generate story data");
-      }
-
-      setAllRounds(storyData.rounds);
-      setCurrentRoundData(storyData.rounds[0]);
-
-      setGameState({
-        status: "playing",
-        currentRound: 1,
-        narrativeState: storyData.rounds[0].narrativeState,
-        choiceHistory: [],
-        intro: storyData.intro,
-        overallTheme: storyData.overallTheme,
-      });
-    } catch (error) {
-      toast.error("Failed to start game: " + (error as Error).message);
-      logger.error("Start game error:", error);
-    } finally {
-      setIsLoading(false);
-      setLoadingMessage(undefined);
-    }
-  }, [settings]);
-
-  const makeChoice = useCallback(
-    async (choice: IChoice) => {
-      if (!allRounds) return;
-
-      if (!choice.isCorrect) {
-        setGameState((prev: IGameState) => ({
-          ...prev,
-          status: "failure",
-          failureReason: choice.consequence,
-          choiceHistory: [...prev.choiceHistory, choice],
-        }));
-        return;
-      }
-
-      if (gameState.currentRound >= (settings.gameConfig?.rounds || 2)) {
-        setGameState((prev: IGameState) => ({
-          ...prev,
-          status: "victory",
-          choiceHistory: [...prev.choiceHistory, choice],
-        }));
-        return;
-      }
-
-      const nextRoundIndex = gameState.currentRound;
-      if (nextRoundIndex < allRounds.length) {
-        const nextRound = allRounds[nextRoundIndex];
-        setCurrentRoundData(nextRound);
-        setGameState((prev: IGameState) => ({
-          ...prev,
-          currentRound: prev.currentRound + 1,
-          narrativeState: nextRound.narrativeState || prev.narrativeState,
-          choiceHistory: [...prev.choiceHistory, choice],
-        }));
-      }
-    },
-    [allRounds, gameState, settings.gameConfig]
-  );
-
-  const resetGame = useCallback(() => {
-    setGameState(defaultGameState);
-    setAllRounds(null);
-    setCurrentRoundData(null);
-  }, []);
-
-  const contextValue = useMemo(
-    () => ({
-      gameState,
-      allRounds,
-      currentRoundData,
-      isLoading,
-      loadingMessage,
-      startGame,
-      makeChoice,
-      resetGame,
-    }),
-    [
-      gameState,
-      allRounds,
-      currentRoundData,
-      isLoading,
-      loadingMessage,
-      startGame,
-      makeChoice,
-      resetGame,
-    ]
-  );
 
   useEffect(() => {
-    logger.debug("GameContext state updated", {
-      gameStateStatus: gameState.status,
-      currentRound: gameState.currentRound,
-      hasAllRounds: Boolean(allRounds),
-    });
-  }, [gameState.status, gameState.currentRound, allRounds]);
+    const restored = readExpedition();
+    latestExpedition.current = restored;
+    // Start from the same snapshot on the server and during hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setExpedition(restored);
+    return () => {
+      pendingGeneration.current = null;
+    };
+  }, []);
+
+  const { gameState, currentRoundData, totalRounds } = useMemo(() => {
+    if (!expedition) {
+      return { gameState: defaultGameState, currentRoundData: null, totalRounds: 0 };
+    }
+
+    const { story, choiceIndexes } = expedition;
+    const choiceHistory = choiceIndexes.map(
+      (index, round) => story.rounds[round].choices[index],
+    );
+    const lastChoice = choiceHistory.at(-1);
+    const totalRounds = story.rounds.length;
+    const status: IGameState["status"] =
+      lastChoice?.isCorrect === false
+        ? "failure"
+        : choiceHistory.length === totalRounds
+          ? "victory"
+          : "playing";
+    const currentRound = choiceHistory.length + (status === "playing" ? 1 : 0);
+    const currentRoundData = story.rounds[currentRound - 1];
+
+    return {
+      gameState: {
+        status,
+        currentRound,
+        narrativeState: currentRoundData.narrativeState,
+        choiceHistory,
+        failureReason: status === "failure" ? lastChoice?.consequence : undefined,
+        intro: story.intro,
+        overallTheme: story.overallTheme,
+      },
+      currentRoundData,
+      totalRounds,
+    };
+  }, [expedition]);
+
+  const updateExpedition = useCallback((next: Expedition | null) => {
+    latestExpedition.current = next;
+    setExpedition(next);
+    writeExpedition(next);
+  }, []);
+
+  const beginStory = useCallback((story: IFullStoryResponse) => {
+    updateExpedition({ story, choiceIndexes: [] });
+  }, [updateExpedition]);
+
+  const startGame = useCallback(async () => {
+    const { providerConfig, gameConfig } = settings;
+    if (pendingGeneration.current || latestExpedition.current !== null) return;
+    if (!providerConfig || !apiKey?.trim()) return;
+
+    const request = Symbol();
+    pendingGeneration.current = request;
+    setIsLoading(true);
+
+    try {
+      const story = await generateStory(
+        providerConfig,
+        {
+          rounds: gameConfig?.rounds ?? 2,
+          choicesPerRound: gameConfig?.choicesPerRound ?? 2,
+          contentLanguage: gameConfig?.contentLanguage ?? "English",
+        },
+        createStorySeed(),
+      );
+      if (pendingGeneration.current === request) {
+        beginStory(FullStoryResponseSchema.parse(story));
+      }
+    } catch (error) {
+      if (pendingGeneration.current !== request) return;
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error("Failed to start game: " + message);
+      logger.error("Start game error:", error);
+    } finally {
+      if (pendingGeneration.current === request) {
+        pendingGeneration.current = null;
+        setIsLoading(false);
+      }
+    }
+  }, [apiKey, beginStory, settings]);
+
+  const startSample = useCallback(() => {
+    if (pendingGeneration.current || latestExpedition.current !== null) return;
+
+    const language = settings.gameConfig?.contentLanguage;
+    beginStory(sampleStories[language === "Vietnamese" ? language : "English"]);
+  }, [beginStory, settings.gameConfig?.contentLanguage]);
+
+  const makeChoice = useCallback(
+    (choiceIndex: number) => {
+      if (
+        !expedition ||
+        expedition !== latestExpedition.current ||
+        gameState.status !== "playing" ||
+        !currentRoundData?.choices[choiceIndex]
+      ) {
+        return;
+      }
+
+      updateExpedition({
+        story: expedition.story,
+        choiceIndexes: [...expedition.choiceIndexes, choiceIndex],
+      });
+    },
+    [currentRoundData, expedition, gameState.status, updateExpedition],
+  );
+
+  const replayGame = useCallback(() => {
+    const current = latestExpedition.current;
+    if (current && !pendingGeneration.current) beginStory(current.story);
+  }, [beginStory]);
+
+  const resetGame = useCallback(() => {
+    if (!pendingGeneration.current) updateExpedition(null);
+  }, [updateExpedition]);
+
+  const contextValue: GameContextType = {
+    gameState,
+    totalRounds,
+    currentRoundData,
+    isRestoring: expedition === undefined,
+    isLoading,
+    startGame,
+    startSample,
+    makeChoice,
+    replayGame,
+    resetGame,
+  };
 
   return (
     <GameContext.Provider value={contextValue}>
       {isLoading && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-          <div className="bg-[var(--background)] pixel-border pixel-shadow px-6 py-5 text-center">
+          <div role="status" className="bg-[var(--background)] pixel-border pixel-shadow px-6 py-5 text-center">
             <div className="font-pixel text-[var(--primary)] mb-3">
               LOADING…
             </div>
-            <div className="flex gap-1 justify-center mb-2">
-              <span className="w-3 h-3 bg-[var(--primary)] animate-bounce [animation-delay:-0.2s]"></span>
-              <span className="w-3 h-3 bg-[var(--primary)]/80 animate-bounce [animation-delay:-0.1s]"></span>
-              <span className="w-3 h-3 bg-[var(--primary)]/60 animate-bounce"></span>
+            <div className="flex gap-1 justify-center mb-2" aria-hidden="true">
+              <span className="w-3 h-3 bg-[var(--primary)] animate-bounce [animation-delay:-0.2s]" />
+              <span className="w-3 h-3 bg-[var(--primary)]/80 animate-bounce [animation-delay:-0.1s]" />
+              <span className="w-3 h-3 bg-[var(--primary)]/60 animate-bounce" />
             </div>
-            {loadingMessage && (
-              <div className="font-retro text-base text-[var(--muted-foreground)]">
-                {loadingMessage}
-              </div>
-            )}
+            <div className="font-retro text-base text-[var(--muted-foreground)]">
+              Generating your adventure…
+            </div>
           </div>
         </div>
       )}
@@ -204,7 +227,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useGame() {
+export function useGame(): GameContextType {
   const context = useContext(GameContext);
   if (context === undefined) {
     throw new Error("useGame must be used within a GameProvider");

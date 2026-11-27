@@ -13,11 +13,11 @@
 
 ## Flow
 
-1. Player configures rounds (2–10), choices per round (2–5), language, provider, and model.
-2. `startGame()` requests one complete story from `/api/generate-story`.
-3. Server validates the response (Zod + round/choice counts).
-4. Client stores all rounds and advances locally — no further LLM calls during play.
-5. Wrong choice ends the run; surviving all rounds wins.
+1. For a generated story, the player configures rounds (2–10), choices per round (2–5), language, provider, and model. Start Adventure locks both start buttons while one request to `/api/generate-story` is pending. The server validates the response and checks its round and choice counts.
+2. Play Sample starts a local story in the selected content language. Each version has two rounds and two choices per round.
+3. Both modes advance through the loaded story locally. A wrong choice ends the run. Choosing correctly through the last round wins, and the victory screen shows that choice's consequence and final inventory.
+4. The game saves a versioned story and choice indexes in `sessionStorage`. A same-tab reload restores the round, history, and result. An invalid save returns to setup. If storage is unavailable, the current run stays playable in memory.
+5. After a loss, Replay Story restarts the same story with an empty choice history. New Adventure clears the saved run and opens setup.
 
 ## Story shape
 
@@ -31,4 +31,4 @@ The parser compacts overlong values and syncs top-level `location` with `narrati
 
 Rounds must be fair deduction puzzles: clues in `sceneSummary` and/or `intro`, plausible wrong choices. Choice `title`/`summary` describe intended action only; outcomes go in `consequence`.
 
-Languages: English, Vietnamese. Controls: mouse, number keys 1–5, Tab/Enter.
+Languages: English, Vietnamese. Select with a pointer, the number row or numeric keypad, or Tab followed by Enter or Space. Held keys and modified shortcuts do not advance the story.
