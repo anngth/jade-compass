@@ -11,6 +11,7 @@ Use Node.js 22+ and pnpm.
 - `pnpm dev` starts the local vinext development server.
 - `pnpm lint` runs ESLint across the repository.
 - `pnpm type-check` runs `tsc --noEmit`.
+- `pnpm test:e2e` runs Playwright on the production build.
 - `pnpm build` creates a production build.
 - `pnpm start` runs the local production server.
 - `pnpm audit` checks dependencies at moderate severity or higher.
@@ -21,7 +22,7 @@ Use TypeScript strict mode and keep public boundaries explicitly typed. Prefer t
 
 ## Testing Guidelines
 
-See [`docs/development.md#verification`](./docs/development.md#verification). No automated test runner yet — run lint, type-check, build, and audit as relevant; manually verify UI routes and keyboard behavior.
+See [`docs/development.md#verification`](./docs/development.md#verification). Run lint, type-check, build, browser tests and audit as relevant. Manually verify UI routes and keyboard behavior outside the browser suite.
 
 ## Commit & Pull Request Guidelines
 
