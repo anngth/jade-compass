@@ -8,6 +8,7 @@
     "start": "vinext start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
+    "test:e2e": "playwright test",
     "audit": "pnpm audit --audit-level=moderate",
     "release": "./scripts/release.sh",
     "release:patch": "./scripts/release.sh patch",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.42.4",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.18",

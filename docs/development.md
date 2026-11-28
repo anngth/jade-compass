@@ -21,13 +21,14 @@ pnpm dev
 | `pnpm start` | Local production server |
 | `pnpm lint` | ESLint |
 | `pnpm type-check` | `tsc --noEmit` |
+| `pnpm test:e2e` | Run Relic Expedition browser tests against the local production build |
 | `pnpm audit` | Dependency audit (moderate+) |
 | `pnpm release[:patch\|:minor\|:major]` | Release workflow |
 | `pnpm changelog` | Changelog extraction |
 
 ## Verification
 
-No automated test runner yet. Before merging, run what applies to your change:
+Before merging, run the checks that apply to your change.
 
 ```bash
 pnpm lint
@@ -36,13 +37,25 @@ pnpm build
 pnpm audit
 ```
 
-Manually check affected routes and keyboard interaction for UI work. Do not use real LLM calls for routine checks.
+### Browser tests
+
+Install the Playwright browser once and again after a Playwright upgrade. On Linux CI, use `--with-deps` to install system libraries as well.
+
+```bash
+pnpm exec playwright install chromium
+pnpm build
+pnpm test:e2e
+```
+
+The suite starts and stops the production server on port 4273. It covers sample play and recovery, AI request retries and navigation, keyboard selection, and the victory screen. AI responses are mocked. No provider credentials are required. CI retains browser traces for failed tests for seven days.
+
+Manually check other affected routes and keyboard interactions for UI work.
 
 When adding tests, prefer Vitest and React Testing Library, starting with session/validation, story schemas, provider mocks, then game flow.
 
 ## CI and deploy
 
-**CI** (`ci.yml`): frozen lockfile install, type-check, build. Run lint and audit locally.
+CI (`ci.yml`) installs from the frozen lockfile, type-checks, builds and runs the Chromium suite for pull requests and pushes to main or master. Run lint and audit locally.
 
 **Deploy**: Cloudflare Workers Git integration — push to `main` → production; PRs → preview. Set `SESSION_SECRET` via `wrangler secret put SESSION_SECRET`.
 

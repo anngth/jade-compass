@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skull, X } from "lucide-react";
 
 export function FailurePage() {
-  const { gameState, resetGame } = useGame();
+  const { gameState, replayGame, resetGame } = useGame();
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -111,9 +111,14 @@ export function FailurePage() {
           </CardContent>
         </Card>
 
-        <Button className="w-full text-lg" onClick={resetGame}>
-          TRY AGAIN
-        </Button>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button className="text-lg" onClick={replayGame}>
+            Replay Story
+          </Button>
+          <Button variant="outline" className="text-lg" onClick={resetGame}>
+            New Adventure
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -4,7 +4,6 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useGame } from "@/games/relic-expedition/context/game-context";
 import { useSettings } from "@/contexts/settings-context";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   GameHeader,
@@ -14,32 +13,11 @@ import {
 } from "@/games/relic-expedition/components/setup";
 
 export function HomePage() {
-  const { startGame } = useGame();
+  const { startGame, startSample, isLoading } = useGame();
   const { apiKey, isLoadingSettings } = useSettings();
 
   const [showApiKey, setShowApiKey] = useState(false);
-
-  const handleStartGame = async () => {
-    if (!apiKey) {
-      toast.error("Please enter your API key first");
-      return;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await startGame();
-  };
-
-  // Determine button text based on current form state
-  const getStartButtonText = () => {
-    if (!apiKey) {
-      return "Enter API Key";
-    }
-    return "Start Adventure";
-  };
-
-  const canStart = () => {
-    return !!apiKey;
-  };
+  const hasApiKey = Boolean(apiKey?.trim());
 
   if (isLoadingSettings) {
     return (
@@ -72,9 +50,11 @@ export function HomePage() {
             <div className="lg:col-span-3 flex flex-col space-y-3">
               <IntroductionCard />
               <NewAdventureCard
-                onStartGame={handleStartGame}
-                canStart={canStart()}
-                startButtonText={getStartButtonText()}
+                onStartGame={startGame}
+                onStartSample={startSample}
+                canStart={hasApiKey && !isLoading}
+                isLoading={isLoading}
+                startButtonText={hasApiKey ? "Start Adventure" : "Enter API Key"}
               />
             </div>
 
